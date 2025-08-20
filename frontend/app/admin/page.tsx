@@ -13,8 +13,7 @@ interface Guest {
   isAttending: boolean;
   numberOfCompanions?: number;
   dietaryRestrictions?: string;
-  qrCode: string;
-  alphanumericCode: string;
+  qrCode?: { alphanumericCode: string };
   isVerified: boolean;
   verifiedAt?: string;
   createdAt: string;
@@ -61,7 +60,10 @@ const AdminDashboard: React.FC = () => {
           fetch("/api/admin/guests"),
           fetch("/api/guest-groups"),
         ]);
-        if (guestsRes.ok) setGuests(await guestsRes.json());
+        if (guestsRes.ok) {
+          const data = await guestsRes.json();
+          setGuests(data.guests);
+        }
         if (groupsRes.ok) setGroups(await groupsRes.json());
       } catch { }
     })();
@@ -264,9 +266,7 @@ const AdminDashboard: React.FC = () => {
                     <td className="border px-3 py-2">{guest.firstName} {guest.lastName}</td>
                     <td className="border px-3 py-2">{guest.email}</td>
                     <td className="border px-3 py-2">{guest.group?.name || '-'}</td>
-                    <td className="border px-3 py-2">
-                      <img src={guest.qrCode} alt="QR Code" width={40} height={40} className="rounded" />
-                    </td>
+                    <td className="border px-3 py-2">{guest.qrCode?.alphanumericCode || '-'}</td>
                   </tr>
                 ))}
               </tbody>
