@@ -165,12 +165,21 @@ export class GuestsService {
         };
     }
 
-    async findAllAdmin(groupId?: string) {
+    async findAllAdmin(groupId?: string, search?: string) {
+        const where: any = {
+            groupId: groupId || undefined,
+        };
+
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
         console.log('Finding all admin guests in service...');
         const guests = await this.prisma.guest.findMany({
-            where: {
-                groupId: groupId || undefined,
-            },
+            where,
             include: {
                 group: true,
                 qrCode: true,

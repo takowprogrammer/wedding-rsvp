@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Guest {
-  id                   Int      @id @default(autoincrement())
+  id                   String   @id @default(cuid())
   firstName            String
   lastName             String
   email                String   @unique
