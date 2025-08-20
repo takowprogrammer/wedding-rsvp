@@ -165,7 +165,7 @@ export class GuestsService {
         };
     }
 
-    async findAllAdmin(groupId?: string, search?: string) {
+    async findAllAdmin(groupId?: string, search?: string, page: number = 1, limit: number = 10) {
         const where: any = {
             groupId: groupId || undefined,
         };
@@ -177,19 +177,27 @@ export class GuestsService {
             ];
         }
 
-        console.log('Finding all admin guests in service...');
-        const guests = await this.prisma.guest.findMany({
-            where,
-            include: {
-                group: true,
-                qrCode: true,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-        console.log('Guests found in service:', guests);
-        return guests;
+        const skip = (page - 1) * limit;
+
+        console.log(`Finding all admin guests in service... Page: ${page}, Limit: ${limit}`);
+        const [guests, total] = await this.prisma.$transaction([
+            this.prisma.guest.findMany({
+                where,
+                include: {
+                    group: true,
+                    qrCode: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip,
+                take: limit,
+            }),
+            this.prisma.guest.count({ where }),
+        ]);
+
+        console.log(`Guests found in service: ${guests.length}, Total: ${total}`);
+        return { guests, total };
     }
 
 }

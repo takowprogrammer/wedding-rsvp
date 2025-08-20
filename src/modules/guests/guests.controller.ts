@@ -72,11 +72,18 @@ export class GuestsController {
     }
 
     @Get('admin')
-    async findAllAdmin(@Query('groupId') groupId?: string, @Query('search') search?: string) {
+    async findAllAdmin(
+        @Query('groupId') groupId?: string,
+        @Query('search') search?: string,
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '10',
+    ) {
         console.log('Finding all admin guests...');
-        const guests = await this.guestsService.findAllAdmin(groupId, search);
-        console.log('Guests found:', guests);
-        return guests;
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const result = await this.guestsService.findAllAdmin(groupId, search, pageNumber, limitNumber);
+        console.log('Guests found:', result.guests.length);
+        return result;
     }
 
     @Get('stats')
