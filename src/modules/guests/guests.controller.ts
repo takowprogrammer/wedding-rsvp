@@ -72,17 +72,11 @@ export class GuestsController {
     }
 
     @Get('admin')
-    async findAllAdmin(@Query('groupId') groupId?: string) {
+    async findAllAdmin(@Query('groupId') groupId?: string, @Query('search') search?: string) {
         console.log('Finding all admin guests...');
-        const guests = await this.guestsService.findAllAdmin(groupId);
+        const guests = await this.guestsService.findAllAdmin(groupId, search);
         console.log('Guests found:', guests);
-        return guests.map((guest) => ({
-            id: guest.id,
-            name: `${guest.firstName} ${guest.lastName}`,
-            email: guest.email,
-            group: guest.group ? guest.group.name : 'No Group',
-            qrCode: guest.qrCode ? guest.qrCode.qrCodeData : 'No QR Code',
-        }));
+        return guests;
     }
 
     @Get('stats')

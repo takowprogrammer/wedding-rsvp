@@ -8,6 +8,10 @@ interface GuestGroup {
     name: string;
 }
 
+interface QrCode {
+    alphanumericCode: string;
+}
+
 interface Guest {
     id: string;
     firstName: string;
@@ -19,12 +23,14 @@ interface Guest {
     checkedIn: boolean;
     createdAt: string;
     group?: GuestGroup;
+    qrCode?: QrCode;
 }
 
 export default function AdminGuestsPage() {
     const [guests, setGuests] = useState<Guest[]>([]);
     const [groups, setGroups] = useState<GuestGroup[]>([]);
     const [selectedGroup, setSelectedGroup] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -45,6 +51,9 @@ export default function AdminGuestsPage() {
                 if (selectedGroup) {
                     guestUrl.searchParams.append('groupId', selectedGroup);
                 }
+                if (searchTerm) {
+                    guestUrl.searchParams.append('search', searchTerm);
+                }
                 const guestsRes = await fetch(guestUrl.toString());
                 if (!guestsRes.ok) throw new Error('Failed to fetch guests');
                 const guestsData = await guestsRes.json();
@@ -59,31 +68,50 @@ export default function AdminGuestsPage() {
             }
         };
 
-        fetchData();
-    }, [selectedGroup]); // Refetch data when the selectedGroup changes
+        const handler = setTimeout(() => {
+            fetchData();
+        }, 500); // Debounce search input
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [selectedGroup, searchTerm]); // Refetch data when the selectedGroup or searchTerm changes
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Guest List</h1>
-                    <p className="text-gray-600 mt-1">View and filter all RSVPs.</p>
+                    <p className="text-gray-600 mt-1">View, filter, and search all RSVPs.</p>
                 </div>
 
-                {/* Filter Controls */}
+                {/* Filter and Search Controls */}
                 <div className="mb-6 flex items-center space-x-4">
-                    <label htmlFor="group-filter" className="font-medium text-gray-700">Filter by Group:</label>
-                    <select
-                        id="group-filter"
-                        value={selectedGroup}
-                        onChange={(e) => setSelectedGroup(e.target.value)}
-                        className="block w-64 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="">All Groups</option>
-                        {groups.map(group => (
-                            <option key={group.id} value={group.id}>{group.name}</option>
-                        ))}
-                    </select>
+                    <div className="flex-1">
+                        <label htmlFor="search" className="sr-only">Search</label>
+                        <input
+                            type="text"
+                            id="search"
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="group-filter" className="font-medium text-gray-700 sr-only">Filter by Group:</label>
+                        <select
+                            id="group-filter"
+                            value={selectedGroup}
+                            onChange={(e) => setSelectedGroup(e.target.value)}
+                            className="block w-64 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="">All Groups</option>
+                            {groups.map(group => (
+                                <option key={group.id} value={group.id}>{group.name}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {/* Data Table */}
@@ -100,7 +128,7 @@ export default function AdminGuestsPage() {
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Group</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Guests</th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR Code</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RSVP Date</th>
                                     </tr>
@@ -111,7 +139,7 @@ export default function AdminGuestsPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{guest.firstName} {guest.lastName}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{guest.email}<br />{guest.phone}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{guest.group?.name || 'N/A'}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{guest.numberOfGuests}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{guest.qrCode?.alphanumericCode || 'N/A'}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${guest.checkedIn ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                     {guest.checkedIn ? 'Checked-In' : guest.status}
@@ -121,7 +149,7 @@ export default function AdminGuestsPage() {
                                         </tr>
                                     )) : (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">No guests found for the selected filter.</td>
+                                            <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">No guests found.</td>
                                         </tr>
                                     )}
                                 </tbody>
