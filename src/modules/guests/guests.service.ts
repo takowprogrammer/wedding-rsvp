@@ -2,6 +2,7 @@ import { Injectable, ConflictException, Logger } from '@nestjs/common';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { QrCodesService } from '../qr-codes/qr-codes.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class GuestsService {
@@ -10,6 +11,7 @@ export class GuestsService {
     constructor(
         private prisma: PrismaService,
         private qrCodesService: QrCodesService,
+        private mailerService: MailerService,
     ) { }
 
     async create(createGuestDto: CreateGuestDto) {
@@ -53,6 +55,19 @@ export class GuestsService {
             };
 
             this.logger.log('Guest creation completed successfully');
+
+            // Send email with QR code
+            try {
+                await this.mailerService.sendGuestQrCodeEmail(savedGuest, {
+                    alphanumericCode: qrCode.alphanumericCode,
+                    qrCodeImage: qrCodeImage,
+                });
+                this.logger.log(`Email sent successfully to ${savedGuest.email}`);
+            } catch (emailError) {
+                this.logger.error(`Failed to send email to ${savedGuest.email}:`, emailError);
+                // a failure to send email should not block the rsvp process
+            }
+
             return result;
 
         } catch (error) {
