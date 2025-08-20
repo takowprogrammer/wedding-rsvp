@@ -41,7 +41,7 @@ export default function AdminGuestsPage() {
                 setGroups(groupsData);
         
                 // Fetch guests, optionally filtering by the selected group
-                const guestUrl = new URL('/guests/admin', window.location.origin);
+                const guestUrl = new URL('/api/admin/guests', window.location.origin);
                 if (selectedGroup) {
                     guestUrl.searchParams.append('groupId', selectedGroup);
                 }
