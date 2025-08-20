@@ -1,0 +1,169 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guest {
+  id                   Int      @id @default(autoincrement())
+  firstName            String
+  lastName             String
+  email                String   @unique
+  phone                String?
+  numberOfGuests       Int      @default(1)
+  dietaryRestrictions  String?
+  specialRequests      String?
+  status               Status   @default(CONFIRMED)
+  checkedIn            Boolean  @default(false)
+  checkedInAt          DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  qrCode QrCode?
+
+  // relation to guest group
+  group    GuestGroup? @relation(fields: [groupId], references: [id])
+  groupId  String?
+
+  // thank you tracking
+  thankYouSentAt DateTime?
+
+  // attribution: which invitation generated this RSVP (if any)
+  sourceInvitation    Invitation? @relation(fields: [sourceInvitationId], references: [id])
+  sourceInvitationId  String?
+
+  // logs relations
+  scanLogs  ScanLog[]
+  emailLogs EmailLog[]
+
+  @@map("guests")
+}
+
+model QrCode {
+  id                String   @id @default(cuid())
+  alphanumericCode  String   @unique @db.VarChar(8)
+  qrCodeData        String
+  used              Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  
+  guest   Guest  @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guestId String @unique
+
+  // back relation to scan logs
+  scanLogs ScanLog[]
+  
+  @@map("qr_codes")
+}
+
+model Invitation {
+  id           String   @id @default(cuid())
+  templateName String
+  title        String
+  message      String
+  imageUrl     String?
+  buttonText   String
+  formUrl      String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // back relations
+  deliveries InvitationDelivery[]
+  rsvps      Guest[]
+
+  @@map("invitations")
+}
+
+model GuestGroup {
+  id      String  @id @default(cuid())
+  name    String  @unique
+
+  guests  Guest[]
+
+  @@map("guest_groups")
+}
+
+// logs for scans
+model ScanLog {
+  id         String      @id @default(cuid())
+  guest      Guest?      @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guestId    String?
+  qrCode     QrCode?     @relation(fields: [qrCodeId], references: [id], onDelete: SetNull)
+  qrCodeId   String?
+  method     ScanMethod
+  success    Boolean
+  reason     String?
+  createdAt  DateTime    @default(now())
+
+  @@map("scan_logs")
+}
+
+enum ScanMethod {
+  SCAN
+  MANUAL
+}
+
+// logs for emails
+model EmailLog {
+  id         String   @id @default(cuid())
+  messageId  String   @unique
+  guest      Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guestId    String?
+  type       String
+  status     String
+  error      String?
+  sentAt     DateTime @default(now())
+  openedAt   DateTime?
+  clickedAt  DateTime?
+
+  @@map("email_logs")
+}
+
+// track invitation shares/deliveries
+model InvitationDelivery {
+  id             String           @id @default(cuid())
+  invitation     Invitation       @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  invitationId   String
+  channel        DeliveryChannel
+  status         DeliveryStatus   @default(PENDING)
+  recipientEmail String?
+  recipientPhone String?
+  messageId      String?
+  error          String?
+  trackingId     String           @unique
+  sentAt         DateTime         @default(now())
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+
+  @@map("invitation_deliveries")
+}
+
+enum DeliveryChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  OPENED
+  CLICKED
+}
+
+enum Status {
+  PENDING
+  CONFIRMED
+  DECLINED
+}

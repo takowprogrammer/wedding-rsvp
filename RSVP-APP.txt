@@ -1,0 +1,50 @@
+1. Digital Guestbook / Message Wall
+Let guests leave digital messages, wishes, or videos that you can keep forever.
+
+Use Firebase or Supabase for real-time updates
+Guests scan a QR code at the venue to access it
+Messages appear live on a screen or in a gallery
+2. Song Request Booth / Live Playlist
+Create a fun interactive music experience:
+
+Guests request songs via your app
+Show a live-updated playlist
+Sync with Spotify or YouTube for DJ/music player
+3. Wedding Hashtag Generator + Social Wall
+Generate a unique hashtag (e.g., #JohnJane2025), then show a live feed of all social media posts using it.
+
+Use Instagram/Facebook Graph API or Twitter API
+Display on website or kiosk
+4. Interactive Seating Map (Google Maps Integration)
+Show guests how to get to the venue with directions, parking info, hotels nearby.
+
+Embed Google Maps
+Add custom pins and notes
+5. Memory Lane Timeline
+A visual timeline of your love story — from meeting to engagement to wedding day.
+
+Use react-vertical-timeline-component or similar
+Shareable link for guests to view online
+
+7. Personalized Wedding App Themes
+If you're having a themed wedding (e.g., beach, vintage, rustic), customize the app with matching colors, fonts, and images.
+
+Create multiple themes in your frontend
+Select theme based on event type
+8. Voice Memo Booth
+Allow guests to record short voice messages or congratulations.
+
+Record in-browser using Web Audio API
+Upload to GCS or AWS S3
+Play back after the event
+9. AI-Powered Guest Matching Game
+Have fun at the reception with a game that guesses who wrote which anonymous message.
+
+Train a basic model or use embeddings
+Or just randomize names for a lighthearted version
+10. Post-Wedding Memories Portal
+After the big day, create a space where guests can relive memories.
+
+Re-share photos, videos, blog posts
+Add a guestbook or slideshow
+Keep it public or password-protected
