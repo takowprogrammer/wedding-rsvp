@@ -117,6 +117,9 @@ export default function RSVPPage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">RSVP Confirmed!</h2>
             <p className="text-gray-600">Thank you for confirming your attendance</p>
+            <p className="text-sm text-gray-500 mt-2">
+              A copy of the QR code and backup alphanumeric code has been sent to <strong>{response.guest.email}</strong>.
+            </p>
           </div>
 
           {/* Important Notice */}
