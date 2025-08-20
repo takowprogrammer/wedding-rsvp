@@ -33,6 +33,9 @@ export default function AdminGuestsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(0);
+    const pageSize = 10;
 
     // Fetch guests and groups
     useEffect(() => {
@@ -43,23 +46,26 @@ export default function AdminGuestsPage() {
                 const groupsRes = await fetch('/api/guest-groups');
                 if (!groupsRes.ok) throw new Error('Failed to fetch guest groups');
                 const groupsData = await groupsRes.json();
-                console.log('Groups data:', groupsData);
                 setGroups(groupsData);
-        
-                // Fetch guests, optionally filtering by the selected group
+
+                // Fetch guests
                 const guestUrl = new URL('/api/admin/guests', window.location.origin);
+                guestUrl.searchParams.append('page', currentPage.toString());
+                guestUrl.searchParams.append('limit', pageSize.toString());
                 if (selectedGroup) {
                     guestUrl.searchParams.append('groupId', selectedGroup);
                 }
                 if (searchTerm) {
                     guestUrl.searchParams.append('search', searchTerm);
                 }
+
                 const guestsRes = await fetch(guestUrl.toString());
                 if (!guestsRes.ok) throw new Error('Failed to fetch guests');
                 const guestsData = await guestsRes.json();
-                console.log('Guests data:', guestsData);
-                setGuests(guestsData);
-        
+
+                setGuests(guestsData.guests);
+                setTotalPages(Math.ceil(guestsData.total / pageSize));
+
             } catch (err) {
                 console.error(err);
                 setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -75,7 +81,15 @@ export default function AdminGuestsPage() {
         return () => {
             clearTimeout(handler);
         };
-    }, [selectedGroup, searchTerm]); // Refetch data when the selectedGroup or searchTerm changes
+    }, [selectedGroup, searchTerm, currentPage, pageSize]);
+
+    const handlePreviousPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -155,6 +169,26 @@ export default function AdminGuestsPage() {
                                 </tbody>
                             </table>
                         )}
+                    </div>
+                    {/* Pagination Controls */}
+                    <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <button
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-sm text-gray-700">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
                 </div>
             </div>
