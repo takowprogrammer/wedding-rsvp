@@ -8,6 +8,7 @@ import { GuestGroupsModule } from './modules/guest-groups/guest-groups.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { ThankYouModule } from './modules/thank-you/thank-you.module';
 import { ThankYouService } from './modules/thank-you/thank-you.service';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { ThankYouService } from './modules/thank-you/thank-you.service';
         GuestGroupsModule,
         MailerModule,
         ThankYouModule,
+        AuthModule,
     ],
 })
 export class AppModule implements OnModuleInit {
