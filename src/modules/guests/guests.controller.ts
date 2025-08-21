@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Param, HttpException, HttpStatus, Query, Logger, Res, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, HttpException, HttpStatus, Query, Logger, Res, Delete, UseGuards } from '@nestjs/common';
 import { GuestsService } from './guests.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { Response } from 'express';
 import * as QRCode from 'qrcode';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('guests')
+@UseGuards(JwtAuthGuard)
 export class GuestsController {
     private readonly logger = new Logger(GuestsController.name);
 

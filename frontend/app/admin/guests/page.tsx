@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { api } from '@/lib/api';
 
 // Define interfaces for the data structures
 interface GuestGroup {
@@ -41,9 +42,7 @@ export default function AdminGuestsPage() {
         setIsLoading(true);
         try {
             // Fetch groups for the filter dropdown
-            const groupsRes = await fetch('/api/guest-groups');
-            if (!groupsRes.ok) throw new Error('Failed to fetch guest groups');
-            const groupsData = await groupsRes.json();
+            const groupsData = await api.get('/api/guest-groups');
             setGroups(groupsData);
 
             // Fetch guests
@@ -57,9 +56,7 @@ export default function AdminGuestsPage() {
                 guestUrl.searchParams.append('search', searchTerm);
             }
 
-            const guestsRes = await fetch(guestUrl.toString());
-            if (!guestsRes.ok) throw new Error('Failed to fetch guests');
-            const guestsData = await guestsRes.json();
+            const guestsData = await api.get(guestUrl.toString());
 
             setGuests(guestsData.guests);
             setTotalPages(Math.ceil(guestsData.total / pageSize));
@@ -93,13 +90,7 @@ export default function AdminGuestsPage() {
     const handleDelete = async (guestId: string) => {
         if (window.confirm('Are you sure you want to delete this guest?')) {
             try {
-                const res = await fetch(`/api/admin/guests/${guestId}`, {
-                    method: 'DELETE',
-                });
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || 'Failed to delete guest');
-                }
+                await api.delete(`/api/admin/guests/${guestId}`);
                 // Refetch guests after deletion
                 fetchData();
             } catch (err) {

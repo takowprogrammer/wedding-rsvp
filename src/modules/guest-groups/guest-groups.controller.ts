@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Logger } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Logger, UseGuards } from '@nestjs/common';
 import { GuestGroupsService } from './guest-groups.service';
 import { CreateGuestGroupDto } from './dto/create-guest-group.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('guest-groups')
+@UseGuards(JwtAuthGuard)
 export class GuestGroupsController {
     private readonly logger = new Logger(GuestGroupsController.name);
 
