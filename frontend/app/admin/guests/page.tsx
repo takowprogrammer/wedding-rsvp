@@ -91,6 +91,38 @@ export default function AdminGuestsPage() {
         setCurrentPage((prev) => Math.min(prev + 1, totalPages));
     };
 
+    const handleDelete = async (guestId: string) => {
+        if (window.confirm('Are you sure you want to delete this guest?')) {
+            try {
+                const res = await fetch(`/api/admin/guests/${guestId}`, {
+                    method: 'DELETE',
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || 'Failed to delete guest');
+                }
+                // Refetch guests after deletion
+                const guestUrl = new URL('/api/admin/guests', window.location.origin);
+                guestUrl.searchParams.append('page', currentPage.toString());
+                guestUrl.searchParams.append('limit', pageSize.toString());
+                if (selectedGroup) {
+                    guestUrl.searchParams.append('groupId', selectedGroup);
+                }
+                if (searchTerm) {
+                    guestUrl.searchParams.append('search', searchTerm);
+                }
+                const guestsRes = await fetch(guestUrl.toString());
+                if (!guestsRes.ok) throw new Error('Failed to fetch guests');
+                const guestsData = await guestsRes.json();
+                setGuests(guestsData.guests);
+                setTotalPages(Math.ceil(guestsData.total / pageSize));
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-7xl mx-auto">
@@ -145,6 +177,9 @@ export default function AdminGuestsPage() {
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">QR Code</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">RSVP Date</th>
+                                        <th scope="col" className="relative px-6 py-3">
+                                            <span className="sr-only">Actions</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -160,6 +195,9 @@ export default function AdminGuestsPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(guest.createdAt).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button onClick={() => handleDelete(guest.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                                            </td>
                                         </tr>
                                     )) : (
                                         <tr>

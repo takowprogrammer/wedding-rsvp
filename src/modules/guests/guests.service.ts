@@ -215,4 +215,9 @@ export class GuestsService {
         return { guests, total };
     }
 
+    async remove(id: string) {
+        return await this.prisma.guest.delete({
+            where: { id },
+        });
+    }
 }
