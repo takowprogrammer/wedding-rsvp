@@ -1,7 +1,9 @@
-import { Controller, Post, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { ThankYouService } from './thank-you.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('thank-you')
+@UseGuards(JwtAuthGuard)
 export class ThankYouController {
     constructor(private readonly thankYouService: ThankYouService) { }
 

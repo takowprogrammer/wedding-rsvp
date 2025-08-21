@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { api } from "@/lib/api";
 
 interface Guest {
   id: string;
@@ -45,6 +46,7 @@ interface ExtendedStats {
 }
 
 const AdminDashboard: React.FC = () => {
+  const router = useRouter();
   const [guests, setGuests] = useState<Guest[]>([]);
   const [filteredGuests, setFilteredGuests] = useState<Guest[]>([]);
   const [groups, setGroups] = useState<GuestGroup[]>([]);
@@ -53,18 +55,20 @@ const AdminDashboard: React.FC = () => {
   const defaultEventDate = process.env.NEXT_PUBLIC_WEDDING_DATE as string | undefined;
   const [eventDate, setEventDate] = useState<string>(defaultEventDate || "");
 
+  const handleLogout = () => {
+    document.cookie = 'admin_token=; path=/; max-age=0';
+    router.push('/admin/login');
+  };
+
   useEffect(() => {
     (async () => {
       try {
-        const [guestsRes, groupsRes] = await Promise.all([
-          fetch("/api/admin/guests/all"),
-          fetch("/api/guest-groups"),
+        const [guestsData, groupsData] = await Promise.all([
+          api.get("/api/admin/guests/all"),
+          api.get("/api/guest-groups"),
         ]);
-        if (guestsRes.ok) {
-          const data = await guestsRes.json();
-          setGuests(data);
-        }
-        if (groupsRes.ok) setGroups(await groupsRes.json());
+        setGuests(guestsData);
+        setGroups(groupsData);
       } catch { }
     })();
   }, []);
@@ -121,6 +125,14 @@ const AdminDashboard: React.FC = () => {
           <div className="relative z-10 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">Admin Dashboard</h1>
             <p className="text-gray-700 mt-2">Manage guests, invitations, and check-ins with ease</p>
+          </div>
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white font-medium shadow hover:shadow-md transition"
+            >
+              Logout
+            </button>
           </div>
         </div>
         <div className="pointer-events-none absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/40 blur-2xl" />
