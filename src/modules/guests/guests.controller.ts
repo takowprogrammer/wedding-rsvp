@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, HttpException, HttpStatus, Query, Logger, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, HttpException, HttpStatus, Query, Logger, Res, Delete } from '@nestjs/common';
 import { GuestsService } from './guests.service';
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { Response } from 'express';
@@ -103,5 +103,10 @@ export class GuestsController {
             throw new HttpException('Guest not found', HttpStatus.NOT_FOUND);
         }
         return guest;
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        return await this.guestsService.remove(id);
     }
 }
