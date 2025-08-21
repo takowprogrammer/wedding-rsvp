@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Define interfaces for the data structures
 interface GuestGroup {
@@ -37,43 +37,42 @@ export default function AdminGuestsPage() {
     const [totalPages, setTotalPages] = useState(0);
     const pageSize = 10;
 
-    // Fetch guests and groups
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch groups for the filter dropdown
-                const groupsRes = await fetch('/api/guest-groups');
-                if (!groupsRes.ok) throw new Error('Failed to fetch guest groups');
-                const groupsData = await groupsRes.json();
-                setGroups(groupsData);
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            // Fetch groups for the filter dropdown
+            const groupsRes = await fetch('/api/guest-groups');
+            if (!groupsRes.ok) throw new Error('Failed to fetch guest groups');
+            const groupsData = await groupsRes.json();
+            setGroups(groupsData);
 
-                // Fetch guests
-                const guestUrl = new URL('/api/admin/guests', window.location.origin);
-                guestUrl.searchParams.append('page', currentPage.toString());
-                guestUrl.searchParams.append('limit', pageSize.toString());
-                if (selectedGroup) {
-                    guestUrl.searchParams.append('groupId', selectedGroup);
-                }
-                if (searchTerm) {
-                    guestUrl.searchParams.append('search', searchTerm);
-                }
-
-                const guestsRes = await fetch(guestUrl.toString());
-                if (!guestsRes.ok) throw new Error('Failed to fetch guests');
-                const guestsData = await guestsRes.json();
-
-                setGuests(guestsData.guests);
-                setTotalPages(Math.ceil(guestsData.total / pageSize));
-
-            } catch (err) {
-                console.error(err);
-                setError(err instanceof Error ? err.message : 'An unknown error occurred');
-            } finally {
-                setIsLoading(false);
+            // Fetch guests
+            const guestUrl = new URL('/api/admin/guests', window.location.origin);
+            guestUrl.searchParams.append('page', currentPage.toString());
+            guestUrl.searchParams.append('limit', pageSize.toString());
+            if (selectedGroup) {
+                guestUrl.searchParams.append('groupId', selectedGroup);
             }
-        };
+            if (searchTerm) {
+                guestUrl.searchParams.append('search', searchTerm);
+            }
 
+            const guestsRes = await fetch(guestUrl.toString());
+            if (!guestsRes.ok) throw new Error('Failed to fetch guests');
+            const guestsData = await guestsRes.json();
+
+            setGuests(guestsData.guests);
+            setTotalPages(Math.ceil(guestsData.total / pageSize));
+
+        } catch (err) {
+            console.error(err);
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [currentPage, pageSize, selectedGroup, searchTerm]);
+
+    useEffect(() => {
         const handler = setTimeout(() => {
             fetchData();
         }, 500); // Debounce search input
@@ -81,7 +80,7 @@ export default function AdminGuestsPage() {
         return () => {
             clearTimeout(handler);
         };
-    }, [selectedGroup, searchTerm, currentPage, pageSize]);
+    }, [fetchData]);
 
     const handlePreviousPage = () => {
         setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -102,20 +101,7 @@ export default function AdminGuestsPage() {
                     throw new Error(errorData.message || 'Failed to delete guest');
                 }
                 // Refetch guests after deletion
-                const guestUrl = new URL('/api/admin/guests', window.location.origin);
-                guestUrl.searchParams.append('page', currentPage.toString());
-                guestUrl.searchParams.append('limit', pageSize.toString());
-                if (selectedGroup) {
-                    guestUrl.searchParams.append('groupId', selectedGroup);
-                }
-                if (searchTerm) {
-                    guestUrl.searchParams.append('search', searchTerm);
-                }
-                const guestsRes = await fetch(guestUrl.toString());
-                if (!guestsRes.ok) throw new Error('Failed to fetch guests');
-                const guestsData = await guestsRes.json();
-                setGuests(guestsData.guests);
-                setTotalPages(Math.ceil(guestsData.total / pageSize));
+                fetchData();
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'An error occurred';
                 setError(errorMessage);

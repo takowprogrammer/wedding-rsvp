@@ -57,12 +57,12 @@ const AdminDashboard: React.FC = () => {
     (async () => {
       try {
         const [guestsRes, groupsRes] = await Promise.all([
-          fetch("/api/admin/guests"),
+          fetch("/api/admin/guests/all"),
           fetch("/api/guest-groups"),
         ]);
         if (guestsRes.ok) {
           const data = await guestsRes.json();
-          setGuests(data.guests);
+          setGuests(data);
         }
         if (groupsRes.ok) setGroups(await groupsRes.json());
       } catch { }

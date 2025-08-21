@@ -109,4 +109,9 @@ export class GuestsController {
     async remove(@Param('id') id: string) {
         return await this.guestsService.remove(id);
     }
+
+    @Get('all')
+    async findAllUnpaginated() {
+        return await this.guestsService.findAllUnpaginated();
+    }
 }
