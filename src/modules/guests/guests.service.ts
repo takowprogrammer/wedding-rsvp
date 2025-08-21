@@ -71,6 +71,9 @@ export class GuestsService {
             return result;
 
         } catch (error) {
+            if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+                throw new ConflictException('A guest with this email address has already RSVP\'d.');
+            }
             this.logger.error('Error creating guest:', error.message);
             throw error;
         }
@@ -218,6 +221,18 @@ export class GuestsService {
     async remove(id: string) {
         return await this.prisma.guest.delete({
             where: { id },
+        });
+    }
+
+    async findAllUnpaginated() {
+        return await this.prisma.guest.findMany({
+            include: {
+                group: true,
+                qrCode: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
         });
     }
 }
