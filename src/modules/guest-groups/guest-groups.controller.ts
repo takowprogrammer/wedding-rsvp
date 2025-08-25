@@ -4,7 +4,6 @@ import { CreateGuestGroupDto } from './dto/create-guest-group.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('guest-groups')
-@UseGuards(JwtAuthGuard)
 export class GuestGroupsController {
     private readonly logger = new Logger(GuestGroupsController.name);
 
@@ -24,6 +23,7 @@ export class GuestGroupsController {
     }
 
     @Post()
+    @UseGuards(JwtAuthGuard)
     async create(@Body() createGuestGroupDto: CreateGuestGroupDto) {
         this.logger.log(`Received request to create guest group: ${createGuestGroupDto.name}`);
         try {

@@ -184,9 +184,12 @@ export class GuestsService {
     }
 
     async findAllAdmin(groupId?: string, search?: string, page: number = 1, limit: number = 10) {
-        const where: any = {
-            groupId: groupId || undefined,
-        };
+        const where: any = {};
+
+        // Only add groupId filter if it's provided and not empty
+        if (groupId && groupId.trim() !== '') {
+            where.groupId = groupId;
+        }
 
         if (search) {
             where.OR = [
@@ -197,7 +200,9 @@ export class GuestsService {
 
         const skip = (page - 1) * limit;
 
-        console.log(`Finding all admin guests in service... Page: ${page}, Limit: ${limit}`);
+        console.log(`Finding all admin guests in service... Page: ${page}, Limit: ${limit}, GroupId: ${groupId}, Search: ${search}`);
+        console.log('Where clause:', JSON.stringify(where, null, 2));
+        
         const [guests, total] = await this.prisma.$transaction([
             this.prisma.guest.findMany({
                 where,

@@ -6,7 +6,6 @@ import * as QRCode from 'qrcode';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('guests')
-@UseGuards(JwtAuthGuard)
 export class GuestsController {
     private readonly logger = new Logger(GuestsController.name);
 
@@ -28,6 +27,7 @@ export class GuestsController {
     }
 
     @Post('create')
+    @UseGuards(JwtAuthGuard)
     async createWithQRCode(@Body() body: { name: string; email: string; phone: string }, @Res() res: Response) {
         try {
             // Map `name` to `firstName` and `lastName` (split by space or default to empty strings)
@@ -69,11 +69,13 @@ export class GuestsController {
     }
 
     @Get()
+    @UseGuards(JwtAuthGuard)
     async findAll() {
         return await this.guestsService.findAll();
     }
 
     @Get('admin')
+    @UseGuards(JwtAuthGuard)
     async findAllAdmin(
         @Query('groupId') groupId?: string,
         @Query('search') search?: string,
@@ -81,24 +83,35 @@ export class GuestsController {
         @Query('limit') limit: string = '10',
     ) {
         console.log('Finding all admin guests...');
+        console.log('Query parameters:', { groupId, search, page, limit });
+        
         const pageNumber = parseInt(page, 10);
         const limitNumber = parseInt(limit, 10);
+        
+        console.log('Parsed parameters:', { pageNumber, limitNumber });
+        
         const result = await this.guestsService.findAllAdmin(groupId, search, pageNumber, limitNumber);
         console.log('Guests found:', result.guests.length);
+        console.log('Total count:', result.total);
+        console.log('Response structure:', { guests: result.guests?.length || 0, total: result.total });
+        
         return result;
     }
 
     @Get('stats')
+    @UseGuards(JwtAuthGuard)
     async getStats() {
         return await this.guestsService.getStats();
     }
 
     @Get('stats/extended')
+    @UseGuards(JwtAuthGuard)
     async getExtendedStats(@Query('eventDate') eventDate?: string) {
         return await this.guestsService.getExtendedStats(eventDate);
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     async findOne(@Param('id') id: string) {
         const guest = await this.guestsService.findOne(id);
         if (!guest) {
@@ -108,11 +121,13 @@ export class GuestsController {
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard)
     async remove(@Param('id') id: string) {
         return await this.guestsService.remove(id);
     }
 
     @Get('all')
+    @UseGuards(JwtAuthGuard)
     async findAllUnpaginated() {
         return await this.guestsService.findAllUnpaginated();
     }
