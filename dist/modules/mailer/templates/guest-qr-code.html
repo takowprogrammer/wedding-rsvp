@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Event QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .content {
+            text-align: center;
+        }
+        .qr-code {
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Thank You for Your RSVP!</h1>
+        </div>
+        <div class="content">
+            <p>Hello __GUEST_NAME__,</p>
+            <p>We are so excited to have you at our event. Here is your personal QR code for check-in.</p>
+            <div class="qr-code">
+                <img src="cid:qrcode" alt="Your QR Code">
+            </div>
+            <p>As a backup, your alphanumeric code is:</p>
+            <h2>__ALPHANUMERIC_CODE__</h2>
+            <p>Please have one of these ready when you arrive for a smooth check-in process.</p>
+        </div>
+        <div class="footer">
+            <p>See you at the event!</p>
+        </div>
+    </div>
+</body>
+</html>
