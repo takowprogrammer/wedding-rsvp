@@ -78,8 +78,8 @@ export default function Home() {
               key={idx}
               onClick={() => setCurrent(idx)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${idx === current
-                  ? 'bg-white shadow-lg scale-125'
-                  : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-white shadow-lg scale-125'
+                : 'bg-white/50 hover:bg-white/75'
                 }`}
             />
           ))}
@@ -214,20 +214,20 @@ export default function Home() {
             Check out our event program and look forward to receiving your personalized invitation soon.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Link
               href="/program"
               className="px-10 py-4 rounded-full bg-white text-amber-600 font-semibold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer"
               onClick={() => console.log('CTA Program button clicked')}
             >
               View Event Program
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/login"
               className="px-8 py-4 rounded-full bg-transparent text-white font-semibold text-lg border-2 border-white hover:bg-white hover:text-amber-600 transition-all duration-300 cursor-pointer"
               onClick={() => console.log('CTA Admin button clicked')}
             >
               Admin Access
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -247,19 +247,19 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-white mb-4">Wedding Platform</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/admin/login" className="hover:text-white transition-colors cursor-pointer">Admin Login</a></li>
-                <li><a href="/program" className="hover:text-white transition-colors cursor-pointer">Event Program</a></li>
-                <li><a href="/" className="hover:text-white transition-colors cursor-pointer">Homepage</a></li>
+                <li><Link href="/admin/login" className="hover:text-white transition-colors cursor-pointer">Admin Login</Link></li>
+                <li><Link href="/program" className="hover:text-white transition-colors cursor-pointer">Event Program</Link></li>
+                <li><Link href="/" className="hover:text-white transition-colors cursor-pointer">Homepage</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">Get Started</h4>
-              <a
+              <Link
                 href="/program"
                 className="inline-block px-6 py-3 bg-gradient-to-r from-amber-500 to-blue-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-blue-600 transition-all duration-200 cursor-pointer"
               >
                 View Program
-              </a>
+              </Link>
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">

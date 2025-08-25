@@ -2,22 +2,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { navigateToPublicRoute } from "@/components/AuthGuard";
 
 interface TemplateItem {
-    templateName: string;
+    id: string;
+    name: string;
     imageUrl: string;
-    file: string;
     displayName?: string;
+    templateName?: string;
 }
 
 export default function NewInvitationPage() {
     const router = useRouter();
-    const [templates, setTemplates] = useState<Array<{
-        id: string;
-        name: string;
-        imageUrl: string;
-    }>>([]);
+    const [templates, setTemplates] = useState<TemplateItem[]>([]);
     const [templateName, setTemplateName] = useState("");
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
@@ -34,7 +30,7 @@ export default function NewInvitationPage() {
     // Filter templates based on search
     const filteredTemplates = templates.filter(t =>
         t.displayName?.toLowerCase().includes(templateSearch.toLowerCase()) ||
-        t.templateName.toLowerCase().includes(templateSearch.toLowerCase())
+        t.name.toLowerCase().includes(templateSearch.toLowerCase())
     );
 
     useEffect(() => {
@@ -61,7 +57,7 @@ export default function NewInvitationPage() {
         })();
     }, []);
 
-    const submit = async (e: React.FormEvent) => {
+    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmitting(true);
         setError(null);
@@ -118,7 +114,7 @@ export default function NewInvitationPage() {
                             </Link>
                             <span className="text-gray-400">|</span>
                             <button
-                                onClick={() => navigateToPublicRoute(router, "/")}
+                                onClick={() => router.push('/')}
                                 className="text-dusty-blue-600 hover:text-dusty-blue-800 font-medium transition-colors"
                             >
                                 Home
@@ -232,24 +228,24 @@ export default function NewInvitationPage() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {filteredTemplates.map(t => (
                                     <button
-                                        key={t.templateName}
+                                        key={t.id}
                                         type="button"
-                                        onClick={() => { setTemplateName(t.templateName); setImageUrl(t.imageUrl); }}
-                                        className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 hover:scale-105 ${templateName === t.templateName
+                                        onClick={() => { setTemplateName(t.name); setImageUrl(t.imageUrl); }}
+                                        className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 hover:scale-105 ${templateName === t.name
                                             ? 'border-phoenix-sand-500 ring-4 ring-phoenix-sand-200'
                                             : 'border-gray-200 hover:border-phoenix-sand-300'
                                             }`}
-                                        title={t.templateName}
+                                        title={t.name}
                                     >
                                         <img
                                             src={t.imageUrl}
-                                            alt={t.templateName}
+                                            alt={t.name}
                                             className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                         <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
                                             <div className="text-xs font-medium text-white bg-black/50 rounded px-2 py-1 truncate">
-                                                {t.displayName || t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                                {t.displayName || t.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                             </div>
                                         </div>
                                     </button>
@@ -277,7 +273,7 @@ export default function NewInvitationPage() {
                                     onChange={(e) => {
                                         const name = e.target.value;
                                         setTemplateName(name);
-                                        const t = templates.find(t => t.templateName === name);
+                                        const t = templates.find(t => t.name === name);
                                         setImageUrl(t ? t.imageUrl : "");
                                     }}
                                     required
@@ -287,8 +283,8 @@ export default function NewInvitationPage() {
                                         {templatesLoading ? 'Loading templates...' : `Select a template (${filteredTemplates.length} available)`}
                                     </option>
                                     {filteredTemplates.map(t => (
-                                        <option key={t.templateName} value={t.templateName}>
-                                            {t.displayName || t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                        <option key={t.id} value={t.name}>
+                                            {t.displayName || t.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                         </option>
                                     ))}
                                 </select>

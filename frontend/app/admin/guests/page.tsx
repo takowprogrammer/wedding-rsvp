@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '@/lib/api';
-import { logout, getAuthToken } from '@/lib/auth';
+import Link from 'next/link';
+import { api } from '../../../lib/api';
+import { logout, getAuthToken } from '../../../lib/auth';
 
 // Define interfaces for the data structures
 interface GuestGroup {
@@ -164,18 +165,18 @@ export default function AdminGuestsPage() {
                             <p className="text-gray-600 mt-1">View, filter, and search all RSVPs for Doris & Emmanuel's special day.</p>
                         </div>
                         <div className="flex items-center space-x-3">
-                            <a
+                            <Link
                                 href="/admin"
                                 className="px-4 py-2 text-sm font-medium text-amber-700 bg-white border border-amber-300 rounded-md hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                             >
                                 ← Back to Dashboard
-                            </a>
-                            <a
+                            </Link>
+                            <Link
                                 href="/"
                                 className="px-4 py-2 text-sm font-medium text-amber-700 bg-white border border-amber-300 rounded-md hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                             >
                                 🏠 Wedding Home
-                            </a>
+                            </Link>
                             <button
                                 onClick={logout}
                                 className="px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
