@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-    const baseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api').replace(/\/$/, '');
-    const backendUrl = `${baseUrl}/guests/all`;
+    const backendUrl = 'http://localhost:8080/api/guests/all';
     const authHeader = req.headers.get('authorization');
 
     try {
@@ -13,12 +12,20 @@ export async function GET(req: NextRequest) {
                 ...(authHeader ? { Authorization: authHeader } : {}),
             },
         });
-        const result = await res.json();
+
         if (!res.ok) {
+            const result = await res.json().catch(() => ({ message: 'Failed to fetch guests' }));
+            console.error('Guests all API error:', result);
             return NextResponse.json({ error: result.message || 'Failed to fetch guests' }, { status: res.status });
         }
+
+        const result = await res.json();
         return NextResponse.json(result);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Something went wrong' }, { status: 500 });
+    } catch (error) {
+        console.error('Error fetching all guests:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
     }
 }

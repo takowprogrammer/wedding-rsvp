@@ -18,6 +18,7 @@ const common_1 = require("@nestjs/common");
 const guests_service_1 = require("./guests.service");
 const create_guest_dto_1 = require("./dto/create-guest.dto");
 const QRCode = require("qrcode");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let GuestsController = GuestsController_1 = class GuestsController {
     constructor(guestsService) {
         this.guestsService = guestsService;
@@ -69,17 +70,17 @@ let GuestsController = GuestsController_1 = class GuestsController {
     async findAll() {
         return await this.guestsService.findAll();
     }
-    async findAllAdmin(groupId) {
+    async findAllAdmin(groupId, search, page = '1', limit = '10') {
         console.log('Finding all admin guests...');
-        const guests = await this.guestsService.findAllAdmin(groupId);
-        console.log('Guests found:', guests);
-        return guests.map((guest) => ({
-            id: guest.id,
-            name: `${guest.firstName} ${guest.lastName}`,
-            email: guest.email,
-            group: guest.group ? guest.group.name : 'No Group',
-            qrCode: guest.qrCode ? guest.qrCode.qrCodeData : 'No QR Code',
-        }));
+        console.log('Query parameters:', { groupId, search, page, limit });
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        console.log('Parsed parameters:', { pageNumber, limitNumber });
+        const result = await this.guestsService.findAllAdmin(groupId, search, pageNumber, limitNumber);
+        console.log('Guests found:', result.guests.length);
+        console.log('Total count:', result.total);
+        console.log('Response structure:', { guests: result.guests?.length || 0, total: result.total });
+        return result;
     }
     async getStats() {
         return await this.guestsService.getStats();
@@ -94,6 +95,12 @@ let GuestsController = GuestsController_1 = class GuestsController {
         }
         return guest;
     }
+    async remove(id) {
+        return await this.guestsService.remove(id);
+    }
+    async findAllUnpaginated() {
+        return await this.guestsService.findAllUnpaginated();
+    }
 };
 exports.GuestsController = GuestsController;
 __decorate([
@@ -105,6 +112,7 @@ __decorate([
 ], GuestsController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)('create'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
@@ -113,25 +121,32 @@ __decorate([
 ], GuestsController.prototype, "createWithQRCode", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], GuestsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('admin'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Query)('groupId')),
+    __param(1, (0, common_1.Query)('search')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], GuestsController.prototype, "findAllAdmin", null);
 __decorate([
     (0, common_1.Get)('stats'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], GuestsController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('stats/extended'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Query)('eventDate')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -139,11 +154,27 @@ __decorate([
 ], GuestsController.prototype, "getExtendedStats", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], GuestsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], GuestsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], GuestsController.prototype, "findAllUnpaginated", null);
 exports.GuestsController = GuestsController = GuestsController_1 = __decorate([
     (0, common_1.Controller)('guests'),
     __metadata("design:paramtypes", [guests_service_1.GuestsService])

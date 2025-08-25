@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const guests_service_1 = require("./guests.service");
 const guests_controller_1 = require("./guests.controller");
 const qr_codes_module_1 = require("../qr-codes/qr-codes.module");
+const mailer_module_1 = require("../mailer/mailer.module");
 let GuestsModule = class GuestsModule {
 };
 exports.GuestsModule = GuestsModule;
 exports.GuestsModule = GuestsModule = __decorate([
     (0, common_1.Module)({
-        imports: [qr_codes_module_1.QrCodesModule],
+        imports: [qr_codes_module_1.QrCodesModule, mailer_module_1.MailerModule],
         controllers: [guests_controller_1.GuestsController],
         providers: [guests_service_1.GuestsService],
         exports: [guests_service_1.GuestsService],

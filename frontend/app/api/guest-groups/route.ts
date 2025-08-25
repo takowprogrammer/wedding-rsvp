@@ -1,34 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/guest-groups';
+export async function GET() {
     try {
-        const res = await fetch(backendUrl, { method: 'GET' });
-        const result = await res.json();
-        if (!res.ok) {
-            return NextResponse.json({ error: result.message || 'Failed to fetch guest groups' }, { status: res.status });
+        const response = await fetch('http://localhost:8080/api/guest-groups', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            return NextResponse.json(
+                { message: 'Failed to fetch guest groups' },
+                { status: response.status }
+            );
         }
+
+        const result = await response.json();
         return NextResponse.json(result);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Something went wrong' }, { status: 500 });
+    } catch (error) {
+        console.error('Error fetching guest groups:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
     }
 }
 
-export async function POST(req: NextRequest) {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api/guest-groups';
-    const data = await req.json();
+export async function POST(request: NextRequest) {
     try {
-        const res = await fetch(backendUrl, {
+        const body = await request.json();
+
+        const response = await fetch('http://localhost:8080/api/guest-groups', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
         });
-        const result = await res.json();
-        if (!res.ok) {
-            return NextResponse.json({ error: result.message || 'Failed to create guest group' }, { status: res.status });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            return NextResponse.json(
+                { message: errorData.message || 'Failed to create guest group' },
+                { status: response.status }
+            );
         }
+
+        const result = await response.json();
         return NextResponse.json(result);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Something went wrong' }, { status: 500 });
+    } catch (error) {
+        console.error('Error creating guest group:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
     }
 }

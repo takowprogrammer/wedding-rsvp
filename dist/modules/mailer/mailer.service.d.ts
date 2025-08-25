@@ -6,5 +6,13 @@ export declare class MailerService {
         subject: string;
         html: string;
         from?: string;
+        attachments?: any[];
+    }): Promise<string>;
+    sendGuestQrCodeEmail(guest: {
+        firstName: string;
+        email: string;
+    }, qrCode: {
+        alphanumericCode: string;
+        qrCodeImage: string;
     }): Promise<string>;
 }

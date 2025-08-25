@@ -64,9 +64,9 @@ export default function InvitationsPage() {
                 console.log('Delete failed:', result);
                 setError("Failed to delete invitation");
             }
-        } catch (err) {
-            console.error('Delete error:', err);
-            setError("Failed to delete invitation");
+        } catch (error) {
+            console.error('Error deleting invitation:', error);
+            setError('Failed to delete invitation');
         } finally {
             setDeletingId(null);
         }
@@ -88,9 +88,9 @@ export default function InvitationsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-nude-50 via-phoenix-sand-50 to-dusty-blue-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-amber-50 via-blue-50 to-amber-100 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-phoenix-sand-500 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
                     <p className="text-gray-600">Loading invitations...</p>
                 </div>
             </div>
@@ -98,32 +98,32 @@ export default function InvitationsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-nude-50 via-phoenix-sand-50 to-dusty-blue-50">
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-blue-50 to-amber-100">
             {/* Navigation Header */}
-            <nav className="bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm">
+            <nav className="bg-white/80 backdrop-blur-md border-b border-amber-200/20 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <Link
                                 href="/admin"
-                                className="text-dusty-blue-600 hover:text-dusty-blue-800 font-medium transition-colors"
+                                className="text-amber-600 hover:text-amber-800 font-medium transition-colors"
                             >
                                 ← Back to Admin
                             </Link>
                             <span className="text-gray-400">|</span>
                             <Link
                                 href="/"
-                                className="text-dusty-blue-600 hover:text-dusty-blue-800 font-medium transition-colors"
+                                className="text-amber-600 hover:text-amber-800 font-medium transition-colors"
                             >
-                                Home
+                                Wedding Home
                             </Link>
                         </div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-nude-600 to-phoenix-sand-600 bg-clip-text text-transparent">
-                            Invitations
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-blue-600 bg-clip-text text-transparent">
+                            Wedding Invitations
                         </h1>
                         <Link
                             href="/admin/invitations/new"
-                            className="px-4 py-2 bg-gradient-to-r from-phoenix-sand-500 to-nude-500 hover:from-phoenix-sand-600 hover:to-nude-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-blue-500 hover:from-amber-600 hover:to-blue-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                         >
                             + New Invitation
                         </Link>
@@ -157,18 +157,18 @@ export default function InvitationsPage() {
                             <p className="text-gray-500 mb-6">Get started by creating your first beautiful invitation.</p>
                             <Link
                                 href="/admin/invitations/new"
-                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-phoenix-sand-500 to-nude-500 hover:from-phoenix-sand-600 hover:to-nude-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-blue-500 hover:from-amber-600 hover:to-blue-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                             >
                                 Create Your First Invitation
                             </Link>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {invitations.map((invitation) => (
-                            <div key={invitation.id} className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div key={invitation.id} className="bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col">
                                 {invitation.imageUrl && (
-                                    <div className="h-48 overflow-hidden">
+                                    <div className="h-40 sm:h-48 overflow-hidden flex-shrink-0">
                                         <img
                                             src={invitation.imageUrl}
                                             alt={invitation.title}
@@ -177,8 +177,8 @@ export default function InvitationsPage() {
                                     </div>
                                 )}
 
-                                <div className="p-6">
-                                    <div className="flex items-center justify-between mb-3">
+                                <div className="p-4 sm:p-6 flex-1 flex flex-col">
+                                    <div className="flex items-center justify-between mb-3 flex-shrink-0">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${invitation.isActive
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-gray-100 text-gray-800'
@@ -190,33 +190,34 @@ export default function InvitationsPage() {
                                         </span>
                                     </div>
 
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 flex-shrink-0">
                                         {invitation.title}
                                     </h3>
 
-                                    <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                                    <p className="text-sm text-gray-600 mb-3 line-clamp-3 flex-1">
                                         {invitation.message}
                                     </p>
 
-                                    <div className="space-y-2 mb-4">
-                                        <div className="text-xs text-gray-500">
+                                    <div className="space-y-2 mb-4 text-xs text-gray-500 flex-shrink-0">
+                                        <div>
                                             <span className="font-medium">Template:</span> {formatTemplateName(invitation.templateName)}
                                         </div>
-                                        <div className="text-xs text-gray-500">
+                                        <div>
                                             <span className="font-medium">Button:</span> {invitation.buttonText}
                                         </div>
                                         {invitation.formUrl && (
-                                            <div className="text-xs text-gray-500">
-                                                <span className="font-medium">Form:</span> {invitation.formUrl}
+                                            <div className="truncate">
+                                                <span className="font-medium">Form:</span>
+                                                <span className="truncate block">{invitation.formUrl}</span>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="flex space-x-2">
+                                    <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                                         <Link
                                             href={`/api/invitations/${invitation.id}/preview`}
                                             target="_blank"
-                                            className="flex-1 px-3 py-2 text-sm bg-dusty-blue-100 text-dusty-blue-700 rounded-lg hover:bg-dusty-blue-200 transition-colors text-center"
+                                            className="flex-1 px-3 py-2 text-sm bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition-colors text-center"
                                         >
                                             Preview
                                         </Link>
@@ -226,7 +227,7 @@ export default function InvitationsPage() {
                                                 navigator.clipboard.writeText(previewUrl);
                                                 // You could add a toast notification here
                                             }}
-                                            className="flex-1 px-3 py-2 text-sm bg-phoenix-sand-100 text-phoenix-sand-700 rounded-lg hover:bg-phoenix-sand-200 transition-colors"
+                                            className="flex-1 px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
                                         >
                                             Copy Link
                                         </button>

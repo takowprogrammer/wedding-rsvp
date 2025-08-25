@@ -7,9 +7,9 @@ export declare class QrCodesController {
         guest: {
             id: string;
             createdAt: Date;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             phone: string | null;
             numberOfGuests: number;
             dietaryRestrictions: string | null;
@@ -29,9 +29,9 @@ export declare class QrCodesController {
         guest: {
             id: string;
             createdAt: Date;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             phone: string | null;
             numberOfGuests: number;
             dietaryRestrictions: string | null;
@@ -52,9 +52,9 @@ export declare class QrCodesController {
         guest: {
             id: string;
             createdAt: Date;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             phone: string | null;
             numberOfGuests: number;
             dietaryRestrictions: string | null;

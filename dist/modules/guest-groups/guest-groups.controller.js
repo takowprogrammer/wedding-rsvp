@@ -17,6 +17,7 @@ exports.GuestGroupsController = void 0;
 const common_1 = require("@nestjs/common");
 const guest_groups_service_1 = require("./guest-groups.service");
 const create_guest_group_dto_1 = require("./dto/create-guest-group.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let GuestGroupsController = GuestGroupsController_1 = class GuestGroupsController {
     constructor(guestGroupsService) {
         this.guestGroupsService = guestGroupsService;
@@ -56,6 +57,7 @@ __decorate([
 ], GuestGroupsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_guest_group_dto_1.CreateGuestGroupDto]),

@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { id } = params;
-    const baseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api').replace(/\/$/, '');
-    const backendUrl = `${baseUrl}/guests/${id}`;
+    const { id } = await params;
+    const backendUrl = `http://localhost:8080/api/guests/${id}`;
     const authHeader = req.headers.get('authorization');
 
     try {
@@ -18,7 +17,8 @@ export async function DELETE(
         });
 
         if (!res.ok) {
-            const errorData = await res.json();
+            const errorData = await res.json().catch(() => ({ message: 'Failed to delete guest' }));
+            console.error('Delete guest API error:', errorData);
             return NextResponse.json({ error: errorData.message || 'Failed to delete guest' }, { status: res.status });
         }
 
@@ -32,7 +32,11 @@ export async function DELETE(
         // If there's no content, return a 204 No Content response
         return new NextResponse(null, { status: 204 });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Something went wrong' }, { status: 500 });
+    } catch (error) {
+        console.error('Error updating guest:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
     }
 }

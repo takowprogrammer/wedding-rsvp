@@ -20,6 +20,7 @@ const guest_groups_module_1 = require("./modules/guest-groups/guest-groups.modul
 const mailer_module_1 = require("./modules/mailer/mailer.module");
 const thank_you_module_1 = require("./modules/thank-you/thank-you.module");
 const thank_you_service_1 = require("./modules/thank-you/thank-you.service");
+const auth_module_1 = require("./modules/auth/auth.module");
 let AppModule = class AppModule {
     constructor(thankYouService) {
         this.thankYouService = thankYouService;
@@ -45,6 +46,7 @@ exports.AppModule = AppModule = __decorate([
             guest_groups_module_1.GuestGroupsModule,
             mailer_module_1.MailerModule,
             thank_you_module_1.ThankYouModule,
+            auth_module_1.AuthModule,
         ],
     }),
     __metadata("design:paramtypes", [thank_you_service_1.ThankYouService])

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Wedding RSVP System",
-  description: "Wedding RSVP system with QR code verification",
+  title: "Doris & Emmanuel Wedding",
+  description: "Join us in celebrating our special day with beautiful digital invitations and seamless RSVP management",
 };
 
 export default function RootLayout({

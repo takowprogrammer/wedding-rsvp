@@ -1,11 +1,13 @@
 import { CreateGuestDto } from './dto/create-guest.dto';
 import { QrCodesService } from '../qr-codes/qr-codes.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailerService } from '../mailer/mailer.service';
 export declare class GuestsService {
     private prisma;
     private qrCodesService;
+    private mailerService;
     private readonly logger;
-    constructor(prisma: PrismaService, qrCodesService: QrCodesService);
+    constructor(prisma: PrismaService, qrCodesService: QrCodesService, mailerService: MailerService);
     create(createGuestDto: CreateGuestDto): Promise<{
         guest: {
             id: string;
@@ -125,7 +127,59 @@ export declare class GuestsService {
             emailFailures: number;
         };
     }>;
-    findAllAdmin(groupId?: string): Promise<({
+    findAllAdmin(groupId?: string, search?: string, page?: number, limit?: number): Promise<{
+        guests: ({
+            qrCode: {
+                id: string;
+                createdAt: Date;
+                alphanumericCode: string;
+                qrCodeData: string;
+                used: boolean;
+                guestId: string;
+            };
+            group: {
+                id: string;
+                name: string;
+            };
+        } & {
+            id: string;
+            firstName: string;
+            lastName: string;
+            email: string;
+            phone: string | null;
+            numberOfGuests: number;
+            dietaryRestrictions: string | null;
+            specialRequests: string | null;
+            status: import(".prisma/client").$Enums.Status;
+            checkedIn: boolean;
+            checkedInAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+            thankYouSentAt: Date | null;
+            groupId: string | null;
+            sourceInvitationId: string | null;
+        })[];
+        total: number;
+    }>;
+    remove(id: string): Promise<{
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string | null;
+        numberOfGuests: number;
+        dietaryRestrictions: string | null;
+        specialRequests: string | null;
+        status: import(".prisma/client").$Enums.Status;
+        checkedIn: boolean;
+        checkedInAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        thankYouSentAt: Date | null;
+        groupId: string | null;
+        sourceInvitationId: string | null;
+    }>;
+    findAllUnpaginated(): Promise<({
         qrCode: {
             id: string;
             createdAt: Date;

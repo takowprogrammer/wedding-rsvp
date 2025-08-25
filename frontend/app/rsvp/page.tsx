@@ -131,7 +131,7 @@ export default function RSVPPage() {
               <span className="text-sm font-semibold text-yellow-800">Important</span>
             </div>
             <p className="text-sm text-yellow-700">
-              Please save these codes carefully. You'll need them to enter the wedding venue on the big day!
+              Please save these codes carefully. You&apos;ll need them to enter the wedding venue on the big day!
             </p>
           </div>
 

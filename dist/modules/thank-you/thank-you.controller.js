@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ThankYouController = void 0;
 const common_1 = require("@nestjs/common");
 const thank_you_service_1 = require("./thank-you.service");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let ThankYouController = class ThankYouController {
     constructor(thankYouService) {
         this.thankYouService = thankYouService;
@@ -35,6 +36,7 @@ __decorate([
 ], ThankYouController.prototype, "send", null);
 exports.ThankYouController = ThankYouController = __decorate([
     (0, common_1.Controller)('thank-you'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [thank_you_service_1.ThankYouService])
 ], ThankYouController);
 //# sourceMappingURL=thank-you.controller.js.map

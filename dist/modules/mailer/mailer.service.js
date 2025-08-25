@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MailerService = void 0;
 const common_1 = require("@nestjs/common");
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 let MailerService = class MailerService {
     constructor() {
         this.transporter = nodemailer.createTransport({
@@ -31,8 +33,27 @@ let MailerService = class MailerService {
             to: options.to,
             subject: options.subject,
             html: options.html,
+            attachments: options.attachments,
         });
         return info.messageId;
+    }
+    async sendGuestQrCodeEmail(guest, qrCode) {
+        const templatePath = path.join(__dirname, 'templates', 'guest-qr-code.html');
+        let html = fs.readFileSync(templatePath, 'utf-8');
+        html = html.replace('__GUEST_NAME__', guest.firstName);
+        html = html.replace('__ALPHANUMERIC_CODE__', qrCode.alphanumericCode);
+        const mailOptions = {
+            to: guest.email,
+            subject: 'Your QR Code for the Event',
+            html,
+            attachments: [{
+                    filename: 'qrcode.png',
+                    content: qrCode.qrCodeImage.split(';base64,').pop(),
+                    encoding: 'base64',
+                    cid: 'qrcode'
+                }]
+        };
+        return this.sendMail(mailOptions);
     }
 };
 exports.MailerService = MailerService;

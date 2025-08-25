@@ -65,13 +65,40 @@ export declare class GuestsController {
         groupId: string | null;
         sourceInvitationId: string | null;
     })[]>;
-    findAllAdmin(groupId?: string): Promise<{
-        id: string;
-        name: string;
-        email: string;
-        group: string;
-        qrCode: string;
-    }[]>;
+    findAllAdmin(groupId?: string, search?: string, page?: string, limit?: string): Promise<{
+        guests: ({
+            qrCode: {
+                id: string;
+                createdAt: Date;
+                alphanumericCode: string;
+                qrCodeData: string;
+                used: boolean;
+                guestId: string;
+            };
+            group: {
+                id: string;
+                name: string;
+            };
+        } & {
+            id: string;
+            firstName: string;
+            lastName: string;
+            email: string;
+            phone: string | null;
+            numberOfGuests: number;
+            dietaryRestrictions: string | null;
+            specialRequests: string | null;
+            status: import(".prisma/client").$Enums.Status;
+            checkedIn: boolean;
+            checkedInAt: Date | null;
+            createdAt: Date;
+            updatedAt: Date;
+            thankYouSentAt: Date | null;
+            groupId: string | null;
+            sourceInvitationId: string | null;
+        })[];
+        total: number;
+    }>;
     getStats(): Promise<{
         totalRSVPs: number;
         confirmed: number;
@@ -136,4 +163,53 @@ export declare class GuestsController {
         groupId: string | null;
         sourceInvitationId: string | null;
     }>;
+    remove(id: string): Promise<{
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string | null;
+        numberOfGuests: number;
+        dietaryRestrictions: string | null;
+        specialRequests: string | null;
+        status: import(".prisma/client").$Enums.Status;
+        checkedIn: boolean;
+        checkedInAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        thankYouSentAt: Date | null;
+        groupId: string | null;
+        sourceInvitationId: string | null;
+    }>;
+    findAllUnpaginated(): Promise<({
+        qrCode: {
+            id: string;
+            createdAt: Date;
+            alphanumericCode: string;
+            qrCodeData: string;
+            used: boolean;
+            guestId: string;
+        };
+        group: {
+            id: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string | null;
+        numberOfGuests: number;
+        dietaryRestrictions: string | null;
+        specialRequests: string | null;
+        status: import(".prisma/client").$Enums.Status;
+        checkedIn: boolean;
+        checkedInAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        thankYouSentAt: Date | null;
+        groupId: string | null;
+        sourceInvitationId: string | null;
+    })[]>;
 }

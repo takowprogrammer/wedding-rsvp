@@ -14,10 +14,12 @@ exports.GuestsService = void 0;
 const common_1 = require("@nestjs/common");
 const qr_codes_service_1 = require("../qr-codes/qr-codes.service");
 const prisma_service_1 = require("../prisma/prisma.service");
+const mailer_service_1 = require("../mailer/mailer.service");
 let GuestsService = GuestsService_1 = class GuestsService {
-    constructor(prisma, qrCodesService) {
+    constructor(prisma, qrCodesService, mailerService) {
         this.prisma = prisma;
         this.qrCodesService = qrCodesService;
+        this.mailerService = mailerService;
         this.logger = new common_1.Logger(GuestsService_1.name);
     }
     async create(createGuestDto) {
@@ -53,9 +55,22 @@ let GuestsService = GuestsService_1 = class GuestsService {
                 },
             };
             this.logger.log('Guest creation completed successfully');
+            try {
+                await this.mailerService.sendGuestQrCodeEmail(savedGuest, {
+                    alphanumericCode: qrCode.alphanumericCode,
+                    qrCodeImage: qrCodeImage,
+                });
+                this.logger.log(`Email sent successfully to ${savedGuest.email}`);
+            }
+            catch (emailError) {
+                this.logger.error(`Failed to send email to ${savedGuest.email}:`, emailError);
+            }
             return result;
         }
         catch (error) {
+            if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+                throw new common_1.ConflictException('A guest with this email address has already RSVP\'d.');
+            }
             this.logger.error('Error creating guest:', error.message);
             throw error;
         }
@@ -151,12 +166,45 @@ let GuestsService = GuestsService_1 = class GuestsService {
             },
         };
     }
-    async findAllAdmin(groupId) {
-        console.log('Finding all admin guests in service...');
-        const guests = await this.prisma.guest.findMany({
-            where: {
-                groupId: groupId || undefined,
-            },
+    async findAllAdmin(groupId, search, page = 1, limit = 10) {
+        const where = {};
+        if (groupId && groupId.trim() !== '') {
+            where.groupId = groupId;
+        }
+        if (search) {
+            where.OR = [
+                { firstName: { contains: search, mode: 'insensitive' } },
+                { lastName: { contains: search, mode: 'insensitive' } },
+            ];
+        }
+        const skip = (page - 1) * limit;
+        console.log(`Finding all admin guests in service... Page: ${page}, Limit: ${limit}, GroupId: ${groupId}, Search: ${search}`);
+        console.log('Where clause:', JSON.stringify(where, null, 2));
+        const [guests, total] = await this.prisma.$transaction([
+            this.prisma.guest.findMany({
+                where,
+                include: {
+                    group: true,
+                    qrCode: true,
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip,
+                take: limit,
+            }),
+            this.prisma.guest.count({ where }),
+        ]);
+        console.log(`Guests found in service: ${guests.length}, Total: ${total}`);
+        return { guests, total };
+    }
+    async remove(id) {
+        return await this.prisma.guest.delete({
+            where: { id },
+        });
+    }
+    async findAllUnpaginated() {
+        return await this.prisma.guest.findMany({
             include: {
                 group: true,
                 qrCode: true,
@@ -165,14 +213,13 @@ let GuestsService = GuestsService_1 = class GuestsService {
                 createdAt: 'desc',
             },
         });
-        console.log('Guests found in service:', guests);
-        return guests;
     }
 };
 exports.GuestsService = GuestsService;
 exports.GuestsService = GuestsService = GuestsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        qr_codes_service_1.QrCodesService])
+        qr_codes_service_1.QrCodesService,
+        mailer_service_1.MailerService])
 ], GuestsService);
 //# sourceMappingURL=guests.service.js.map

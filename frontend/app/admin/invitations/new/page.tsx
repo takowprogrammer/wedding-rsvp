@@ -1,15 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { navigateToPublicRoute } from "@/components/AuthGuard";
 
 interface TemplateItem {
     templateName: string;
     imageUrl: string;
     file: string;
+    displayName?: string;
 }
 
 export default function NewInvitationPage() {
-    const [templates, setTemplates] = useState<TemplateItem[]>([]);
+    const router = useRouter();
+    const [templates, setTemplates] = useState<Array<{
+        id: string;
+        name: string;
+        imageUrl: string;
+    }>>([]);
     const [templateName, setTemplateName] = useState("");
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
@@ -19,16 +27,37 @@ export default function NewInvitationPage() {
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [templatesLoading, setTemplatesLoading] = useState(true);
+    const [templatesError, setTemplatesError] = useState<string | null>(null);
+    const [templateSearch, setTemplateSearch] = useState("");
+
+    // Filter templates based on search
+    const filteredTemplates = templates.filter(t =>
+        t.displayName?.toLowerCase().includes(templateSearch.toLowerCase()) ||
+        t.templateName.toLowerCase().includes(templateSearch.toLowerCase())
+    );
 
     useEffect(() => {
         (async () => {
             try {
+                setTemplatesLoading(true);
+                setTemplatesError(null);
+                console.log('Fetching templates...');
                 const res = await fetch("/api/invitations/templates");
                 if (res.ok) {
                     const data = await res.json();
+                    console.log('Templates loaded:', data);
                     setTemplates(data);
+                } else {
+                    console.error('Failed to fetch templates:', res.status, res.statusText);
+                    setTemplatesError(`Failed to load templates: ${res.status} ${res.statusText}`);
                 }
-            } catch { }
+            } catch (error) {
+                console.error('Error fetching templates:', error);
+                setTemplatesError('Failed to load templates. Please try refreshing the page.');
+            } finally {
+                setTemplatesLoading(false);
+            }
         })();
     }, []);
 
@@ -38,20 +67,37 @@ export default function NewInvitationPage() {
         setError(null);
         setSuccess(null);
         try {
-            const invitationData: any = { templateName, title, message, buttonText };
-            if (imageUrl) invitationData.imageUrl = imageUrl;
-            if (formUrl) invitationData.formUrl = formUrl;
+            const formData = new FormData(e.currentTarget);
+            const invitationData = {
+                title: formData.get('title') as string,
+                message: formData.get('message') as string,
+                templateName: formData.get('templateName') as string,
+                buttonText: formData.get('buttonText') as string,
+                formUrl: formData.get('formUrl') as string,
+                isActive: true
+            };
 
             const res = await fetch("/api/invitations", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(invitationData),
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to create invitation");
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Failed to create invitation");
+            }
+
+            const result = await res.json();
             setSuccess("Invitation created successfully! You can now view and share it from the admin area.");
-        } catch (err: any) {
-            setError(err.message || "Something went wrong");
+
+            // Redirect to invitations page after a short delay
+            setTimeout(() => {
+                router.push('/admin/invitations');
+            }, 2000);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+            setError(errorMessage);
         } finally {
             setSubmitting(false);
         }
@@ -71,12 +117,12 @@ export default function NewInvitationPage() {
                                 ← Back to Admin
                             </Link>
                             <span className="text-gray-400">|</span>
-                            <Link
-                                href="/"
+                            <button
+                                onClick={() => navigateToPublicRoute(router, "/")}
                                 className="text-dusty-blue-600 hover:text-dusty-blue-800 font-medium transition-colors"
                             >
                                 Home
-                            </Link>
+                            </button>
                         </div>
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-nude-600 to-phoenix-sand-600 bg-clip-text text-transparent">
                             Create Invitation
@@ -139,33 +185,84 @@ export default function NewInvitationPage() {
 
                 {/* Visual Template Picker */}
                 <div className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800">Choose Your Template</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {templates.map(t => (
-                            <button
-                                key={t.templateName}
-                                type="button"
-                                onClick={() => { setTemplateName(t.templateName); setImageUrl(t.imageUrl); }}
-                                className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 hover:scale-105 ${templateName === t.templateName
-                                    ? 'border-phoenix-sand-500 ring-4 ring-phoenix-sand-200'
-                                    : 'border-gray-200 hover:border-phoenix-sand-300'
-                                    }`}
-                                title={t.templateName}
-                            >
-                                <img
-                                    src={t.imageUrl}
-                                    alt={t.templateName}
-                                    className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
-                                    <div className="text-xs font-medium text-white bg-black/50 rounded px-2 py-1 truncate">
-                                        {t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-semibold text-gray-800">Choose Your Template</h2>
+                        {!templatesLoading && !templatesError && templates.length > 0 && (
+                            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                {templates.length} templates available
+                            </span>
+                        )}
                     </div>
+
+                    {templatesLoading && (
+                        <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-phoenix-sand-500 mx-auto mb-4"></div>
+                            <p className="text-gray-600">Loading templates...</p>
+                        </div>
+                    )}
+
+                    {templatesError && (
+                        <div className="text-center py-8">
+                            <div className="text-red-500 mb-4">
+                                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                            </div>
+                            <p className="text-red-600 mb-4">{templatesError}</p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-4 py-2 bg-phoenix-sand-500 text-white rounded-lg hover:bg-phoenix-sand-600 transition-colors"
+                            >
+                                Refresh Page
+                            </button>
+                        </div>
+                    )}
+
+                    {!templatesLoading && !templatesError && templates.length > 0 && (
+                        <>
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Search templates..."
+                                    value={templateSearch}
+                                    onChange={(e) => setTemplateSearch(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-phoenix-sand-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {filteredTemplates.map(t => (
+                                    <button
+                                        key={t.templateName}
+                                        type="button"
+                                        onClick={() => { setTemplateName(t.templateName); setImageUrl(t.imageUrl); }}
+                                        className={`group relative overflow-hidden rounded-xl border-2 transition-all duration-300 hover:scale-105 ${templateName === t.templateName
+                                            ? 'border-phoenix-sand-500 ring-4 ring-phoenix-sand-200'
+                                            : 'border-gray-200 hover:border-phoenix-sand-300'
+                                            }`}
+                                        title={t.templateName}
+                                    >
+                                        <img
+                                            src={t.imageUrl}
+                                            alt={t.templateName}
+                                            className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                        <div className="absolute bottom-0 left-0 right-0 p-2 text-center">
+                                            <div className="text-xs font-medium text-white bg-black/50 rounded px-2 py-1 truncate">
+                                                {t.displayName || t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {!templatesLoading && !templatesError && templates.length === 0 && (
+                        <div className="text-center py-8">
+                            <p className="text-gray-600">No templates available.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Form */}
@@ -175,7 +272,7 @@ export default function NewInvitationPage() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Template</label>
                                 <select
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-phoenix-sand-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-phoenix-sand-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                     value={templateName}
                                     onChange={(e) => {
                                         const name = e.target.value;
@@ -184,14 +281,20 @@ export default function NewInvitationPage() {
                                         setImageUrl(t ? t.imageUrl : "");
                                     }}
                                     required
+                                    disabled={templatesLoading}
                                 >
-                                    <option value="">Select a template</option>
-                                    {templates.map(t => (
+                                    <option value="">
+                                        {templatesLoading ? 'Loading templates...' : `Select a template (${filteredTemplates.length} available)`}
+                                    </option>
+                                    {filteredTemplates.map(t => (
                                         <option key={t.templateName} value={t.templateName}>
-                                            {t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                            {t.displayName || t.templateName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                         </option>
                                     ))}
                                 </select>
+                                {templatesLoading && (
+                                    <p className="text-xs text-gray-500 mt-1">Please wait while templates load...</p>
+                                )}
                             </div>
 
                             <div>
@@ -272,4 +375,4 @@ export default function NewInvitationPage() {
             </div>
         </div>
     );
-} 
+}

@@ -2,15 +2,18 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (pathname.startsWith('/admin')) {
-    const token = req.cookies.get('admin_token')?.value;
-    if (!token && !pathname.startsWith('/admin/login')) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = '/admin/login';
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  
+  // Skip middleware for login page and API routes
+  if (pathname.startsWith('/admin/login') || pathname.startsWith('/api/')) {
+    return NextResponse.next();
   }
+  
+  // For admin routes, let the client-side AuthGuard handle authentication
+  // This middleware now just ensures the route is accessible
+  if (pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+  
   return NextResponse.next();
 }
 

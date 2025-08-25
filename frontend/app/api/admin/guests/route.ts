@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
-    const baseUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080/api').replace(/\/$/, '');
+    const baseUrl = 'http://localhost:8080/api';
     const fullUrl = new URL(`${baseUrl}/guests/admin`);
 
     // Forward query params from the incoming request
@@ -25,7 +25,11 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: result.message || 'Failed to fetch guests' }, { status: res.status });
         }
         return NextResponse.json(result);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || `Something went wrong: ${error.message}` }, { status: 500 });
+    } catch (error) {
+        console.error('Error fetching guests:', error);
+        return NextResponse.json(
+            { message: 'Internal server error' },
+            { status: 500 }
+        );
     }
 }
