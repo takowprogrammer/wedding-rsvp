@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "description": "Wedding RSVP System with QR Code Verification",
     "scripts": {
-        "build": "nest build",
+        "build": "npm run build:prisma && nest build",
+        "build:prisma": "prisma generate",
         "format": "prettier --write \"src/**/*.ts\"",
         "start": "nest start",
         "start:dev": "nest start --watch",
