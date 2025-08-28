@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test - Railway Backend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔧 CORS Test for Railway Backend</h1>
+    <p>Testing connection to: <strong>https://wedding-rsvp-production.up.railway.app</strong></p>
+
+    <div class="test-section">
+        <h3>1. Test Basic Health Endpoint</h3>
+        <button onclick="testHealth()">Test /api/health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test CORS Configuration</h3>
+        <button onclick="testCors()">Test /api/health/cors</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Simple Ping</h3>
+        <button onclick="testPing()">Test /api/health/ping</button>
+        <div id="ping-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Test POST Request</h3>
+        <button onclick="testPost()">Test POST /api/health/echo</button>
+        <div id="post-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Test with Origin Header</h3>
+        <button onclick="testWithOrigin()">Test with Origin Header</button>
+        <div id="origin-result" class="result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://wedding-rsvp-production.up.railway.app';
+
+        function showResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health`);
+                const data = await response.json();
+                showResult('health-result', data, response.ok);
+            } catch (error) {
+                showResult('health-result', { error: error.message }, false);
+            }
+        }
+
+        async function testCors() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health/cors`);
+                const data = await response.json();
+                showResult('cors-result', data, response.ok);
+            } catch (error) {
+                showResult('cors-result', { error: error.message }, false);
+            }
+        }
+
+        async function testPing() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health/ping`);
+                const data = await response.json();
+                showResult('ping-result', data, response.ok);
+            } catch (error) {
+                showResult('ping-result', { error: error.message }, false);
+            }
+        }
+
+        async function testPost() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health/echo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ test: 'data', timestamp: new Date().toISOString() })
+                });
+                const data = await response.json();
+                showResult('post-result', data, response.ok);
+            } catch (error) {
+                showResult('post-result', { error: error.message }, false);
+            }
+        }
+
+        async function testWithOrigin() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/health/ping`, {
+                    headers: {
+                        'Origin': 'https://rsvp-fe-lovat.vercel.app'
+                    }
+                });
+                const data = await response.json();
+                showResult('origin-result', data, response.ok);
+            } catch (error) {
+                showResult('origin-result', { error: error.message }, false);
+            }
+        }
+    </script>
+</body>
+
+</html>

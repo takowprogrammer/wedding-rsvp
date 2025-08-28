@@ -28,5 +28,15 @@ export const corsConfig = {
 
 export const getCorsConfig = () => {
     const env = process.env.NODE_ENV || 'development';
-    return corsConfig[env] || corsConfig.development;
+    const config = corsConfig[env] || corsConfig.development;
+
+    // Log CORS configuration for debugging
+    console.log('🔧 CORS Configuration Debug:');
+    console.log('   Environment:', env);
+    console.log('   Allowed Origins:', config.origin);
+    console.log('   Methods:', config.methods);
+    console.log('   Headers:', config.allowedHeaders);
+    console.log('   Credentials:', config.credentials);
+
+    return config;
 };

@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Res, Post } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res, Post, Body } from '@nestjs/common';
 import { Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -76,6 +76,30 @@ export class HealthController {
       allowedOrigins: process.env.NODE_ENV === 'production'
         ? ['https://rsvp-fe-lovat.vercel.app', process.env.FRONTEND_URL].filter(Boolean)
         : ['http://localhost:3000', 'http://localhost:3001'],
+    });
+  }
+
+  @Get('ping')
+  async ping(@Res() res: Response) {
+    return res.status(HttpStatus.OK).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      message: 'Pong! Backend is reachable',
+      environment: process.env.NODE_ENV || 'development',
+      cors: 'enabled',
+      requestHeaders: res.req.headers,
+    });
+  }
+
+  @Post('echo')
+  async echo(@Res() res: Response, @Body() body: any) {
+    return res.status(HttpStatus.OK).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      message: 'Echo endpoint working',
+      receivedData: body,
+      environment: process.env.NODE_ENV || 'development',
+      cors: 'enabled',
     });
   }
 }

@@ -22,6 +22,29 @@ async function bootstrap() {
     console.log('🌍 CORS Configuration:', corsOptions);
     app.enableCors(corsOptions);
 
+    // Add explicit CORS preflight handler
+    app.use((req, res, next) => {
+        // Handle CORS preflight
+        if (req.method === 'OPTIONS') {
+            const origin = req.headers.origin;
+            const allowedOrigins = corsOptions.origin;
+
+            console.log('🚁 CORS Preflight Request:');
+            console.log('   Origin:', origin);
+            console.log('   Allowed Origins:', allowedOrigins);
+
+            if (origin && allowedOrigins.includes(origin)) {
+                res.header('Access-Control-Allow-Origin', origin);
+                res.header('Access-Control-Allow-Methods', corsOptions.methods.join(', '));
+                res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders.join(', '));
+                res.header('Access-Control-Allow-Credentials', 'true');
+                res.status(200).end();
+                return;
+            }
+        }
+        next();
+    });
+
     // Enable validation with custom configuration
     app.useGlobalPipes(new ValidationPipe({
         transform: true,
