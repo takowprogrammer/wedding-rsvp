@@ -5,6 +5,7 @@
     "scripts": {
         "build": "npm run build:prisma && nest build",
         "build:prisma": "prisma generate",
+        "build:railway": "prisma generate && nest build",
         "format": "prettier --write \"src/**/*.ts\"",
         "start": "nest start",
         "start:dev": "nest start --watch",

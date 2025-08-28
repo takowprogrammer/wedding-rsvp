@@ -7,42 +7,42 @@ export declare class InvitationsController {
     constructor(invitationsService: InvitationsService);
     create(createInvitationDto: CreateInvitationDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         message: string;
     }>;
     findAll(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findActive(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     listTemplates(): Promise<{
         file: string;
@@ -51,15 +51,15 @@ export declare class InvitationsController {
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     previewInvitation(id: string, res: Response): Promise<void>;
 }

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger, LogLevel } from '@nestjs/common';
+import { getCorsConfig } from './config/cors.config';
 
 async function bootstrap() {
     // Determine log level from environment or default to debug
@@ -16,8 +17,10 @@ async function bootstrap() {
         bufferLogs: true,
     });
 
-    // Enable CORS
-    app.enableCors();
+    // Enable CORS with environment-specific configuration
+    const corsOptions = getCorsConfig();
+    console.log('🌍 CORS Configuration:', corsOptions);
+    app.enableCors(corsOptions);
 
     // Enable validation with custom configuration
     app.useGlobalPipes(new ValidationPipe({
@@ -38,14 +41,26 @@ async function bootstrap() {
     // Set global prefix
     app.setGlobalPrefix('api');
 
-    // Add request logging middleware
+    // Add request logging middleware with CORS debugging
     app.use((req, res, next) => {
         const timestamp = new Date().toISOString();
         const method = req.method;
         const url = req.url;
         const userAgent = req.get('User-Agent') || 'Unknown';
+        const origin = req.get('Origin') || 'No Origin';
+        const referer = req.get('Referer') || 'No Referer';
 
-        console.log(`📡 [${timestamp}] ${method} ${url} - ${userAgent}`);
+        console.log(`📡 [${timestamp}] ${method} ${url}`);
+        console.log(`   👤 User-Agent: ${userAgent}`);
+        console.log(`   🌍 Origin: ${origin}`);
+        console.log(`   🔗 Referer: ${referer}`);
+
+        // Log CORS preflight requests
+        if (method === 'OPTIONS') {
+            console.log(`   🚁 CORS Preflight Request`);
+            console.log(`   📋 Request Headers:`, req.headers);
+        }
+
         next();
     });
 

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const common_1 = require("@nestjs/common");
+const cors_config_1 = require("./config/cors.config");
 async function bootstrap() {
     const logLevel = (process.env.LOG_LEVEL || 'debug');
     const logLevels = ['log', 'error', 'warn', 'debug', 'verbose'];
@@ -12,7 +13,9 @@ async function bootstrap() {
         logger: logLevels,
         bufferLogs: true,
     });
-    app.enableCors();
+    const corsOptions = (0, cors_config_1.getCorsConfig)();
+    console.log('🌍 CORS Configuration:', corsOptions);
+    app.enableCors(corsOptions);
     app.useGlobalPipes(new common_1.ValidationPipe({
         transform: true,
         whitelist: true,
@@ -32,7 +35,16 @@ async function bootstrap() {
         const method = req.method;
         const url = req.url;
         const userAgent = req.get('User-Agent') || 'Unknown';
-        console.log(`📡 [${timestamp}] ${method} ${url} - ${userAgent}`);
+        const origin = req.get('Origin') || 'No Origin';
+        const referer = req.get('Referer') || 'No Referer';
+        console.log(`📡 [${timestamp}] ${method} ${url}`);
+        console.log(`   👤 User-Agent: ${userAgent}`);
+        console.log(`   🌍 Origin: ${origin}`);
+        console.log(`   🔗 Referer: ${referer}`);
+        if (method === 'OPTIONS') {
+            console.log(`   🚁 CORS Preflight Request`);
+            console.log(`   📋 Request Headers:`, req.headers);
+        }
         next();
     });
     const port = process.env.PORT || 8080;

@@ -11,9 +11,10 @@ export declare class GuestsService {
     create(createGuestDto: CreateGuestDto): Promise<{
         guest: {
             id: string;
+            createdAt: Date;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             phone: string | null;
             numberOfGuests: number;
             dietaryRestrictions: string | null;
@@ -21,10 +22,9 @@ export declare class GuestsService {
             status: import(".prisma/client").$Enums.Status;
             checkedIn: boolean;
             checkedInAt: Date | null;
-            createdAt: Date;
             updatedAt: Date;
-            thankYouSentAt: Date | null;
             groupId: string | null;
+            thankYouSentAt: Date | null;
             sourceInvitationId: string | null;
         };
         qrCode: {
@@ -35,10 +35,10 @@ export declare class GuestsService {
     findAll(): Promise<({
         qrCode: {
             id: string;
-            createdAt: Date;
             alphanumericCode: string;
             qrCodeData: string;
             used: boolean;
+            createdAt: Date;
             guestId: string;
         };
         group: {
@@ -47,9 +47,10 @@ export declare class GuestsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        email: string;
         firstName: string;
         lastName: string;
-        email: string;
         phone: string | null;
         numberOfGuests: number;
         dietaryRestrictions: string | null;
@@ -57,19 +58,18 @@ export declare class GuestsService {
         status: import(".prisma/client").$Enums.Status;
         checkedIn: boolean;
         checkedInAt: Date | null;
-        createdAt: Date;
         updatedAt: Date;
-        thankYouSentAt: Date | null;
         groupId: string | null;
+        thankYouSentAt: Date | null;
         sourceInvitationId: string | null;
     })[]>;
     findOne(id: string): Promise<{
         qrCode: {
             id: string;
-            createdAt: Date;
             alphanumericCode: string;
             qrCodeData: string;
             used: boolean;
+            createdAt: Date;
             guestId: string;
         };
         group: {
@@ -78,9 +78,10 @@ export declare class GuestsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        email: string;
         firstName: string;
         lastName: string;
-        email: string;
         phone: string | null;
         numberOfGuests: number;
         dietaryRestrictions: string | null;
@@ -88,10 +89,9 @@ export declare class GuestsService {
         status: import(".prisma/client").$Enums.Status;
         checkedIn: boolean;
         checkedInAt: Date | null;
-        createdAt: Date;
         updatedAt: Date;
-        thankYouSentAt: Date | null;
         groupId: string | null;
+        thankYouSentAt: Date | null;
         sourceInvitationId: string | null;
     }>;
     getStats(): Promise<{
@@ -131,10 +131,10 @@ export declare class GuestsService {
         guests: ({
             qrCode: {
                 id: string;
-                createdAt: Date;
                 alphanumericCode: string;
                 qrCodeData: string;
                 used: boolean;
+                createdAt: Date;
                 guestId: string;
             };
             group: {
@@ -143,9 +143,10 @@ export declare class GuestsService {
             };
         } & {
             id: string;
+            createdAt: Date;
+            email: string;
             firstName: string;
             lastName: string;
-            email: string;
             phone: string | null;
             numberOfGuests: number;
             dietaryRestrictions: string | null;
@@ -153,19 +154,19 @@ export declare class GuestsService {
             status: import(".prisma/client").$Enums.Status;
             checkedIn: boolean;
             checkedInAt: Date | null;
-            createdAt: Date;
             updatedAt: Date;
-            thankYouSentAt: Date | null;
             groupId: string | null;
+            thankYouSentAt: Date | null;
             sourceInvitationId: string | null;
         })[];
         total: number;
     }>;
     remove(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        email: string;
         firstName: string;
         lastName: string;
-        email: string;
         phone: string | null;
         numberOfGuests: number;
         dietaryRestrictions: string | null;
@@ -173,19 +174,18 @@ export declare class GuestsService {
         status: import(".prisma/client").$Enums.Status;
         checkedIn: boolean;
         checkedInAt: Date | null;
-        createdAt: Date;
         updatedAt: Date;
-        thankYouSentAt: Date | null;
         groupId: string | null;
+        thankYouSentAt: Date | null;
         sourceInvitationId: string | null;
     }>;
     findAllUnpaginated(): Promise<({
         qrCode: {
             id: string;
-            createdAt: Date;
             alphanumericCode: string;
             qrCodeData: string;
             used: boolean;
+            createdAt: Date;
             guestId: string;
         };
         group: {
@@ -194,9 +194,10 @@ export declare class GuestsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        email: string;
         firstName: string;
         lastName: string;
-        email: string;
         phone: string | null;
         numberOfGuests: number;
         dietaryRestrictions: string | null;
@@ -204,10 +205,9 @@ export declare class GuestsService {
         status: import(".prisma/client").$Enums.Status;
         checkedIn: boolean;
         checkedInAt: Date | null;
-        createdAt: Date;
         updatedAt: Date;
-        thankYouSentAt: Date | null;
         groupId: string | null;
+        thankYouSentAt: Date | null;
         sourceInvitationId: string | null;
     })[]>;
 }

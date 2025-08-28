@@ -21,6 +21,7 @@ const mailer_module_1 = require("./modules/mailer/mailer.module");
 const thank_you_module_1 = require("./modules/thank-you/thank-you.module");
 const thank_you_service_1 = require("./modules/thank-you/thank-you.service");
 const auth_module_1 = require("./modules/auth/auth.module");
+const health_module_1 = require("./modules/health/health.module");
 let AppModule = class AppModule {
     constructor(thankYouService) {
         this.thankYouService = thankYouService;
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
             }),
             prisma_module_1.PrismaModule,
+            health_module_1.HealthModule,
             guests_module_1.GuestsModule,
             invitations_module_1.InvitationsModule,
             qr_codes_module_1.QrCodesModule,

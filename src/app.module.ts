@@ -9,6 +9,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
 import { ThankYouModule } from './modules/thank-you/thank-you.module';
 import { ThankYouService } from './modules/thank-you/thank-you.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
             isGlobal: true,
         }),
         PrismaModule,
+        HealthModule,
         GuestsModule,
         InvitationsModule,
         QrCodesModule,

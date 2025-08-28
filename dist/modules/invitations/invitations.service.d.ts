@@ -6,54 +6,54 @@ export declare class InvitationsService {
     constructor(prisma: PrismaService);
     create(createInvitationDto: CreateInvitationDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         message: string;
     }>;
     findActive(): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        message: string;
         templateName: string;
         title: string;
-        message: string;
         imageUrl: string | null;
         buttonText: string;
         formUrl: string | null;
         isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     private getTemplateImageUrl;
     generateInvitationHtml(id: string): Promise<string>;
