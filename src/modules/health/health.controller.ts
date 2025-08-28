@@ -74,7 +74,7 @@ export class HealthController {
       environment: process.env.NODE_ENV || 'development',
       cors: 'enabled',
       allowedOrigins: process.env.NODE_ENV === 'production'
-        ? ['https://your-frontend-domain.vercel.app', process.env.FRONTEND_URL].filter(Boolean)
+        ? ['https://rsvp-fe-lovat.vercel.app', process.env.FRONTEND_URL].filter(Boolean)
         : ['http://localhost:3000', 'http://localhost:3001'],
     });
   }

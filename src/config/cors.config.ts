@@ -15,7 +15,7 @@ export const corsConfig = {
     production: {
         origin: [
             // Add your Vercel frontend URL here
-            'https://your-frontend-domain.vercel.app', // Replace with actual domain
+            'https://rsvp-fe-lovat.vercel.app', // Your actual Vercel domain
             process.env.FRONTEND_URL, // Environment variable
         ].filter(Boolean),
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
