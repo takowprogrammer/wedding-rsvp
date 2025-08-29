@@ -11,7 +11,7 @@
         "start": "nest start",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
-        "start:prod": "npx prisma migrate deploy --schema=./node_modules/.prisma/client/schema.prisma && node dist/prisma/seed/seed.js && node dist/main",
+        "start:prod": "echo 'Starting database setup...' && npx prisma migrate deploy --schema=./node_modules/.prisma/client/schema.prisma && echo 'Migrations completed' && node dist/prisma/seed/seed.js && echo 'Seed completed' && node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
         "test": "jest",
         "test:watch": "jest --watch",
