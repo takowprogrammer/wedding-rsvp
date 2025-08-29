@@ -11,7 +11,7 @@
         "start": "nest start",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
-        "start:prod": "npx prisma migrate deploy && npm run seed && node dist/main",
+        "start:prod": "npx prisma migrate deploy && npm run seed && node dist/main", // Updated to run migrations and seed
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
         "test": "jest",
         "test:watch": "jest --watch",
