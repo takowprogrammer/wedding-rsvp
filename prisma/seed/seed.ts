@@ -9,17 +9,33 @@ async function main() {
 
     console.log(`Creating admin user with username: ${username}`);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    try {
+        // Check if admin user already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { username },
+        });
 
-    const adminUser = await prisma.user.create({
-        data: {
-            username,
-            password: hashedPassword,
-        },
-    });
+        if (existingUser) {
+            console.log('Admin user already exists, skipping creation');
+            console.log('Existing user:', existingUser);
+            return;
+        }
 
-    console.log('Admin user created successfully:');
-    console.log(adminUser);
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const adminUser = await prisma.user.create({
+            data: {
+                username,
+                password: hashedPassword,
+            },
+        });
+
+        console.log('Admin user created successfully:');
+        console.log(adminUser);
+    } catch (error) {
+        console.error('Error creating admin user:', error);
+        throw error;
+    }
 }
 
 main()
