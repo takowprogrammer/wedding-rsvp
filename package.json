@@ -5,7 +5,7 @@
     "scripts": {
         "build": "npm run build:prisma && nest build",
         "build:prisma": "prisma generate",
-        "build:railway": "echo '🚀 Starting Railway build...' && prisma generate && echo '✅ Prisma client generated' && nest build && echo '✅ NestJS build completed' && echo '🔄 Copying prisma directory...' && cp -r prisma dist/ && echo '✅ Prisma directory copied' && echo '📁 dist/prisma contents:' && ls -la dist/prisma/",
+        "build:railway": "echo '🚀 Starting Railway build...' && prisma generate && echo '✅ Prisma client generated' && nest build && echo '✅ NestJS build completed' && echo '🔄 Copying prisma directory...' && node copy-prisma.js && echo '✅ Prisma directory copied' && echo '📁 dist/prisma contents:' && ls -la dist/prisma/",
         "seed": "node dist/prisma/seed/seed.js",
         "format": "prettier --write \"src/**/*.ts\"",
         "start": "nest start",
