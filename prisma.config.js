@@ -1,8 +1,6 @@
-import { defineConfig } from '@prisma/internals'
-
-export default defineConfig({
+module.exports = {
   schema: './prisma/schema.prisma',
   seed: {
     exec: 'node prisma/seed/seed.js'
   }
-})
+}
