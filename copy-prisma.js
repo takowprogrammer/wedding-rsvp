@@ -14,6 +14,7 @@ try {
   }
   
   console.log('📁 Source directory exists:', sourceDir);
+  console.log('📁 Source contents:', fs.readdirSync(sourceDir));
   console.log('📁 Target directory:', targetDir);
   
   // Create target directory if it doesn't exist
@@ -26,23 +27,26 @@ try {
   const schemaSource = path.join(sourceDir, 'schema.prisma');
   const schemaTarget = path.join(targetDir, 'schema.prisma');
   
+  console.log('🔍 Looking for schema.prisma at:', schemaSource);
   if (fs.existsSync(schemaSource)) {
     fs.copyFileSync(schemaSource, schemaTarget);
     console.log('✅ Copied schema.prisma');
   } else {
-    throw new Error('schema.prisma not found in source');
+    throw new Error(`schema.prisma not found at ${schemaSource}`);
   }
   
   // Copy migrations directory
   const migrationsSource = path.join(sourceDir, 'migrations');
   const migrationsTarget = path.join(targetDir, 'migrations');
   
+  console.log('🔍 Looking for migrations at:', migrationsSource);
   if (fs.existsSync(migrationsSource)) {
+    console.log('📁 Migrations source contents:', fs.readdirSync(migrationsSource));
     // Copy entire migrations directory recursively
     copyDirRecursive(migrationsSource, migrationsTarget);
     console.log('✅ Copied migrations directory');
   } else {
-    throw new Error('migrations directory not found in source');
+    throw new Error(`migrations directory not found at ${migrationsSource}`);
   }
   
   // Copy seed directory
