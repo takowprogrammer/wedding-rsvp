@@ -11,7 +11,7 @@
         "start": "nest start",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
-        "start:prod": "echo 'Starting database setup...' && echo '🔍 Checking available files:' && pwd && ls -la && echo '📁 dist contents:' && ls -la dist/ && echo '📁 dist/prisma contents:' && ls -la dist/prisma/ && echo '🚀 Running migrations...' && npx prisma migrate deploy --schema=./dist/prisma/schema.prisma && echo 'Migrations completed' && echo '🌱 Running seed...' && npx prisma db seed --schema=./dist/prisma/schema.prisma && echo 'Seed completed' && node dist/main",
+        "start:prod": "echo 'Starting database setup...' && echo '🔍 Checking available files:' && pwd && ls -la && echo '📁 dist contents:' && ls -la dist/ && echo '🚀 Running migrations...' && npx prisma migrate deploy && echo 'Migrations completed' && echo '🌱 Running seed...' && npx prisma db seed && echo 'Seed completed' && node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -84,7 +84,5 @@
         "coverageDirectory": "../coverage",
         "testEnvironment": "node"
     },
-    "prisma": {
-        "seed": "node prisma/seed/seed.js"
-    }
+
 }
