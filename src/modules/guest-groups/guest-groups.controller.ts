@@ -14,11 +14,29 @@ export class GuestGroupsController {
         this.logger.log('Received request to fetch all guest groups');
         try {
             const groups = await this.guestGroupsService.findAll();
-            this.logger.log(`Found ${groups.length} guest groups`);
+            this.logger.log(`Found ${groups.length} guest groups:`, groups.map(g => ({ id: g.id, name: g.name })));
             return groups;
         } catch (error) {
             this.logger.error('Failed to fetch guest groups:', error);
             throw error;
+        }
+    }
+
+    @Get('test')
+    async test() {
+        this.logger.log('Testing guest groups endpoint');
+        try {
+            const count = await this.prisma.guestGroup.count();
+            const groups = await this.prisma.guestGroup.findMany();
+            return {
+                message: 'Guest groups test endpoint',
+                count,
+                groups: groups.map(g => ({ id: g.id, name: g.name })),
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            this.logger.error('Test endpoint error:', error);
+            return { error: error.message, timestamp: new Date().toISOString() };
         }
     }
 

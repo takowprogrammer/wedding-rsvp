@@ -47,6 +47,29 @@ async function main() {
       console.log('✅ Default invitation template created');
     }
 
+    // Create sample guest groups
+    const existingGroups = await prisma.guestGroup.findMany();
+    
+    if (existingGroups.length === 0) {
+      const groups = await Promise.all([
+        prisma.guestGroup.create({
+          data: { name: 'Family' }
+        }),
+        prisma.guestGroup.create({
+          data: { name: 'Friends' }
+        }),
+        prisma.guestGroup.create({
+          data: { name: 'Colleagues' }
+        }),
+        prisma.guestGroup.create({
+          data: { name: 'Extended Family' }
+        })
+      ]);
+      console.log('✅ Sample guest groups created:', groups.map(g => g.name));
+    } else {
+      console.log('✅ Guest groups already exist:', existingGroups.map(g => g.name));
+    }
+
     console.log('🎉 Database seeding completed successfully!');
     console.log('📝 Default credentials:');
     console.log('   Username: admin');
