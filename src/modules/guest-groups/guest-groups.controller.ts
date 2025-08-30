@@ -39,6 +39,23 @@ export class GuestGroupsController {
         }
     }
 
+    @Get('seed')
+    async seed() {
+        this.logger.log('Manual seeding triggered');
+        try {
+            // This will create guest groups if they don't exist
+            const result = await this.guestGroupsService.seedDefaultGroups();
+            return {
+                message: 'Seeding completed',
+                result,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            this.logger.error('Seeding error:', error);
+            return { error: error.message, timestamp: new Date().toISOString() };
+        }
+    }
+
     @Post()
     @UseGuards(JwtAuthGuard)
     async create(@Body() createGuestGroupDto: CreateGuestGroupDto) {
