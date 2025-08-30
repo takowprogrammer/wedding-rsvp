@@ -20,7 +20,37 @@ export class GuestGroupsService {
     }
 
     async seedDefaultGroups() {
-        const defaultGroups = ['Family', 'Friends', 'Colleagues', 'Extended Family'];
+        const defaultGroups = [
+            // Family categories
+            'Family of the Bride',
+            'Family of the Groom',
+            'Extended Family - Bride',
+            'Extended Family - Groom',
+            
+            // Friends categories
+            'Friends of the Bride',
+            'Friends of the Groom',
+            'Mutual Friends',
+            'College Friends',
+            'High School Friends',
+            
+            // Work/Professional categories
+            'Colleagues of the Bride',
+            'Colleagues of the Groom',
+            'Business Associates',
+            
+            // Educational categories
+            'Classmates of the Bride',
+            'Classmates of the Groom',
+            'University Alumni',
+            
+            // Other categories
+            'Neighbors',
+            'Family Friends',
+            'Religious Community',
+            'Sports/Activity Groups'
+        ];
+        
         const createdGroups = [];
 
         for (const groupName of defaultGroups) {
@@ -37,9 +67,10 @@ export class GuestGroupsService {
         }
 
         return {
-            message: 'Default groups seeded',
+            message: 'Comprehensive wedding guest groups seeded',
             created: createdGroups.length,
-            total: await this.prisma.guestGroup.count()
+            total: await this.prisma.guestGroup.count(),
+            groups: defaultGroups
         };
     }
 } 
