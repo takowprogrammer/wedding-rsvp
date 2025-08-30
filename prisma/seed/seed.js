@@ -4,44 +4,65 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function main() {
-    const username = 'admin'; // Placeholder username
-    const password = 'password'; // Placeholder password
+  console.log('🌱 Starting database seeding...');
 
-    console.log(`Creating admin user with username: ${username}`);
+  try {
+    // Check if admin user already exists
+    const existingAdmin = await prisma.user.findUnique({
+      where: { username: 'admin' }
+    });
 
-    try {
-        // Check if admin user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { username },
-        });
-
-        if (existingUser) {
-            console.log('Admin user already exists, skipping creation');
-            return;
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const adminUser = await prisma.user.create({
-            data: {
-                username,
-                password: hashedPassword,
-            },
-        });
-
-        console.log('Admin user created successfully:');
-        console.log(adminUser);
-    } catch (error) {
-        console.error('Error creating admin user:', error);
-        throw error;
+    if (existingAdmin) {
+      console.log('✅ Admin user already exists, skipping...');
+      return;
     }
+
+    // Create admin user
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    
+    const adminUser = await prisma.user.create({
+      data: {
+        username: 'admin',
+        password: hashedPassword,
+      },
+    });
+
+    console.log('✅ Admin user created:', adminUser.username);
+
+    // Create a sample invitation template
+    const existingInvitation = await prisma.invitation.findFirst({
+      where: { templateName: 'Default Wedding Invitation' }
+    });
+
+    if (!existingInvitation) {
+      const invitation = await prisma.invitation.create({
+        data: {
+          templateName: 'Default Wedding Invitation',
+          title: 'You\'re Invited to Our Wedding',
+          message: 'We would be honored to have you join us on our special day.',
+          buttonText: 'RSVP Now',
+          isActive: true,
+        },
+      });
+      console.log('✅ Default invitation template created');
+    }
+
+    console.log('🎉 Database seeding completed successfully!');
+    console.log('📝 Default credentials:');
+    console.log('   Username: admin');
+    console.log('   Password: admin123');
+
+  } catch (error) {
+    console.error('❌ Error during seeding:', error);
+    throw error;
+  }
 }
 
 main()
-    .catch((e) => {
-        console.error('Seed script failed:', e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error('❌ Seeding failed:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
