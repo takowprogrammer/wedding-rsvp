@@ -54,14 +54,16 @@ async function main() {
 
   } catch (error) {
     console.error('❌ Error during seeding:', error);
-    throw error;
+    // Don't throw error, just log it and continue
+    console.log('⚠️ Seeding failed, but continuing with app startup...');
   }
 }
 
 main()
   .catch((e) => {
     console.error('❌ Seeding failed:', e);
-    process.exit(1);
+    // Don't exit, just log the error
+    console.log('⚠️ Seeding failed, but continuing with app startup...');
   })
   .finally(async () => {
     await prisma.$disconnect();

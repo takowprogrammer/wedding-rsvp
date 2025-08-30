@@ -9,7 +9,7 @@
         "start": "nest start",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
-        "start:prod": "npx prisma migrate deploy && npx prisma db seed && node dist/main",
+        "start:prod": "npx prisma migrate deploy && node prisma/seed/seed.js && node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
         "test": "jest",
         "test:watch": "jest --watch",
@@ -82,7 +82,5 @@
         "coverageDirectory": "../coverage",
         "testEnvironment": "node"
     },
-    "prisma": {
-        "seed": "node dist/prisma/seed/seed.js"
-    }
+
 }
