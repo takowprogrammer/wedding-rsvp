@@ -49,7 +49,7 @@ async function main() {
 
     // Create sample guest groups
     const existingGroups = await prisma.guestGroup.findMany();
-    
+
     if (existingGroups.length === 0) {
       const groups = await Promise.all([
         prisma.guestGroup.create({

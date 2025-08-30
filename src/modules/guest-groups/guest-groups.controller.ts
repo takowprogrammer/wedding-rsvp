@@ -26,11 +26,10 @@ export class GuestGroupsController {
     async test() {
         this.logger.log('Testing guest groups endpoint');
         try {
-            const count = await this.prisma.guestGroup.count();
-            const groups = await this.prisma.guestGroup.findMany();
+            const groups = await this.guestGroupsService.findAll();
             return {
                 message: 'Guest groups test endpoint',
-                count,
+                count: groups.length,
                 groups: groups.map(g => ({ id: g.id, name: g.name })),
                 timestamp: new Date().toISOString()
             };

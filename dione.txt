@@ -10,3 +10,4 @@ Other things that can be added
 📨 Sending WhatsApp invites via Twilio or WhatsApp Business API
 📸 Allowing guests to upload photos at the event via a web form or mobile app
 📈 Generating a live dashboard stats panel
+Add photo albulm
