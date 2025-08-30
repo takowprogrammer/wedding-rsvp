@@ -54,43 +54,43 @@ async function main() {
       console.log('✅ Default invitation template already exists');
     }
 
-        // Create sample guest groups
+    // Create sample guest groups
     const existingGroups = await prisma.guestGroup.findMany();
-    
+
     if (existingGroups.length === 0) {
       console.log('📝 Creating comprehensive wedding guest groups...');
-      
+
       const groups = await Promise.all([
         // Family categories
         prisma.guestGroup.create({ data: { name: 'Family of the Bride' } }),
         prisma.guestGroup.create({ data: { name: 'Family of the Groom' } }),
         prisma.guestGroup.create({ data: { name: 'Extended Family - Bride' } }),
         prisma.guestGroup.create({ data: { name: 'Extended Family - Groom' } }),
-        
+
         // Friends categories
         prisma.guestGroup.create({ data: { name: 'Friends of the Bride' } }),
         prisma.guestGroup.create({ data: { name: 'Friends of the Groom' } }),
         prisma.guestGroup.create({ data: { name: 'Mutual Friends' } }),
         prisma.guestGroup.create({ data: { name: 'College Friends' } }),
         prisma.guestGroup.create({ data: { name: 'High School Friends' } }),
-        
+
         // Work/Professional categories
         prisma.guestGroup.create({ data: { name: 'Colleagues of the Bride' } }),
         prisma.guestGroup.create({ data: { name: 'Colleagues of the Groom' } }),
         prisma.guestGroup.create({ data: { name: 'Business Associates' } }),
-        
+
         // Educational categories
         prisma.guestGroup.create({ data: { name: 'Classmates of the Bride' } }),
         prisma.guestGroup.create({ data: { name: 'Classmates of the Groom' } }),
         prisma.guestGroup.create({ data: { name: 'University Alumni' } }),
-        
+
         // Other categories
         prisma.guestGroup.create({ data: { name: 'Neighbors' } }),
         prisma.guestGroup.create({ data: { name: 'Family Friends' } }),
         prisma.guestGroup.create({ data: { name: 'Religious Community' } }),
         prisma.guestGroup.create({ data: { name: 'Sports/Activity Groups' } })
       ]);
-      
+
       console.log('✅ Comprehensive guest groups created:', groups.map(g => g.name));
     } else {
       console.log('✅ Guest groups already exist:', existingGroups.map(g => g.name));
