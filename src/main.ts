@@ -7,7 +7,27 @@ async function bootstrap() {
 
     // Enable CORS - More permissive for mobile apps
     app.enableCors({
-        origin: true, // Allow all origins for mobile app testing
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps)
+            if (!origin) return callback(null, true);
+            
+            // Allow any localhost or 127.0.0.1 with any port
+            if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                return callback(null, true);
+            }
+            
+            // Allow your production domains
+            const allowedOrigins = [
+                'https://wedding-rsvp-production.up.railway.app',
+                'https://rsvp-fe-lovat.vercel.app/'
+            ];
+            
+            if (allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            
+            callback(new Error('Not allowed by CORS'));
+        },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: [
@@ -16,25 +36,11 @@ async function bootstrap() {
             'Accept',
             'Origin',
             'X-Requested-With',
-            'Access-Control-Allow-Origin',
-            'Access-Control-Allow-Headers',
-            'Access-Control-Allow-Methods'
+            'User-Agent'
         ],
         exposedHeaders: ['Authorization', 'Content-Type'],
         preflightContinue: false,
         optionsSuccessStatus: 200
-    });
-
-    // Add middleware to handle OPTIONS requests
-    app.use((req, res, next) => {
-        if (req.method === 'OPTIONS') {
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-            res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Origin, X-Requested-With');
-            res.status(200).end();
-            return;
-        }
-        next();
     });
     // app.enableCors({
     //     origin: [
