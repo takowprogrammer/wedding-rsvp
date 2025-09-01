@@ -12,12 +12,12 @@ async function bootstrap() {
             if (!origin) return callback(null, true);
             
             // Allow localhost with any port
-            if (origin.match(/^https?:\/\/localhost:\d+$/)) {
+            if (origin.match(/^http?:\/\/localhost:\d+$/)) {
                 return callback(null, true);
             }
             
             // Allow 127.0.0.1 with any port
-            if (origin.match(/^https?:\/\/127\.0\.0\.1:\d+$/)) {
+            if (origin.match(/^http?:\/\/127\.0\.0\.1:\d+$/)) {
                 return callback(null, true);
             }
             
