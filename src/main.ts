@@ -8,7 +8,9 @@ async function bootstrap() {
     // Enable CORS - More permissive for mobile apps
     app.enableCors({
         origin: function (origin, callback) {
-            // Allow requests with no origin (like mobile apps)
+            console.log('Request origin:', origin); // Add this for debugging
+            
+            // Allow requests with no origin (like mobile apps, Postman, etc.)
             if (!origin) return callback(null, true);
             
             // Allow any localhost or 127.0.0.1 with any port
@@ -19,13 +21,18 @@ async function bootstrap() {
             // Allow your production domains
             const allowedOrigins = [
                 'https://wedding-rsvp-production.up.railway.app',
-                'https://rsvp-fe-lovat.vercel.app/'
+                'https://rsvp-fe-lovat.vercel.app', // Remove trailing slash
+                // Add Flutter-specific origins if needed
+                'http://localhost',
+                'https://localhost',
             ];
             
-            if (allowedOrigins.includes(origin)) {
+            if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
                 return callback(null, true);
             }
             
+            // Log rejected origins for debugging
+            console.log('CORS rejected origin:', origin);
             callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
@@ -36,7 +43,9 @@ async function bootstrap() {
             'Accept',
             'Origin',
             'X-Requested-With',
-            'User-Agent'
+            'User-Agent',
+            'Cache-Control',
+            'Pragma'
         ],
         exposedHeaders: ['Authorization', 'Content-Type'],
         preflightContinue: false,
