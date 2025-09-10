@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
 
 export class CreateInvitationDto {
     @IsNotEmpty()
@@ -20,4 +20,8 @@ export class CreateInvitationDto {
     @IsOptional()
     @IsString()
     formUrl?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isActive?: boolean;
 }
