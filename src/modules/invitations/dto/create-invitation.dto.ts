@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
 
+// DTO for creating invitations with isActive field support
 export class CreateInvitationDto {
     @IsNotEmpty()
     templateName: string;
