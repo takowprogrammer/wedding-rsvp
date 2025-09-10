@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
+import { Type } from 'class-transformer';
 
 // DTO for creating invitations with isActive field support
 export class CreateInvitationDto {
@@ -23,6 +24,7 @@ export class CreateInvitationDto {
     formUrl?: string;
 
     @IsOptional()
+    @Type(() => Boolean)
     @IsBoolean()
     isActive?: boolean;
 }
