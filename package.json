@@ -5,11 +5,12 @@
     "scripts": {
         "build": "npm run build:prisma && nest build",
         "build:prisma": "prisma generate",
+        "build:railway": "npm ci && npm run build:prisma && nest build",
         "format": "prettier --write \"src/**/*.ts\"",
         "start": "npm run build && npx prisma migrate deploy && node prisma/seed/seed.js && node dist/main",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
-        "start:prod": "npm run build && npx prisma migrate deploy && node prisma/seed/seed.js && node dist/main",
+        "start:prod": "npx prisma migrate deploy && node prisma/seed/seed.js && node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
         "test": "jest",
         "test:watch": "jest --watch",
