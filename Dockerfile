@@ -54,15 +54,15 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 RUN chown -R nestjs:nodejs /app
 USER nestjs
 
-# Expose port 5000
+# Expose port (default 5000)
 EXPOSE 5000
 
-# Health check
+# Health check uses PORT env if provided
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:5000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+    CMD node -e "const p=process.env.PORT||5000;require('http').get(`http://localhost:${p}/api/health`, r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))" || exit 1
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["npm", "run", "start:prod"] 
+CMD ["npm", "run", "start:prod"]
