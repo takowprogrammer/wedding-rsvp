@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -12,18 +12,33 @@ export class InvitationsService {
 
     async create(createInvitationDto: CreateInvitationDto) {
         this.logger.log(`Creating invitation: ${createInvitationDto.title}`);
-        this.logger.debug('Invitation data:', JSON.stringify(createInvitationDto, null, 2));
+        this.logger.debug(`Invitation data: ${JSON.stringify(createInvitationDto, null, 2)}`);
 
         try {
+            const { templateName, title, message, imageUrl, buttonText, formUrl, isActive } = createInvitationDto as any;
+
+            const data: any = {
+                templateName,
+                title,
+                message,
+                imageUrl: imageUrl ?? undefined,
+                buttonText,
+                formUrl: formUrl ?? undefined,
+            };
+            if (typeof isActive === 'boolean') {
+                data.isActive = isActive;
+            }
+
             const result = await this.prisma.invitation.create({
-                data: createInvitationDto
+                data,
             });
 
             this.logger.log(`Invitation created successfully with ID: ${result.id}`);
             return result;
-        } catch (error) {
-            this.logger.error('Failed to create invitation:', error);
-            throw error;
+        } catch (error: any) {
+            this.logger.error(`Failed to create invitation: ${error?.message || error}`);
+            this.logger.debug(error?.stack || 'no stack');
+            throw new InternalServerErrorException('Failed to create invitation');
         }
     }
 
