@@ -56,17 +56,8 @@ export class GuestsService {
 
             this.logger.log('Guest creation completed successfully');
 
-            // Send email with QR code
-            try {
-                await this.mailerService.sendGuestQrCodeEmail(savedGuest, {
-                    alphanumericCode: qrCode.alphanumericCode,
-                    qrCodeImage: qrCodeImage,
-                });
-                this.logger.log(`Email sent successfully to ${savedGuest.email}`);
-            } catch (emailError) {
-                this.logger.error(`Failed to send email to ${savedGuest.email}:`, emailError);
-                // a failure to send email should not block the rsvp process
-            }
+            // Send email with QR code asynchronously (don't await)
+            this.sendEmailAsync(savedGuest, qrCode.alphanumericCode, qrCodeImage);
 
             return result;
 
@@ -76,6 +67,19 @@ export class GuestsService {
             }
             this.logger.error('Error creating guest:', error.message);
             throw error;
+        }
+    }
+
+    private async sendEmailAsync(guest: any, alphanumericCode: string, qrCodeImage: string) {
+        try {
+            await this.mailerService.sendGuestQrCodeEmail(guest, {
+                alphanumericCode,
+                qrCodeImage,
+            });
+            this.logger.log(`Email sent successfully to ${guest.email}`);
+        } catch (emailError) {
+            this.logger.error(`Failed to send email to ${guest.email}:`, emailError);
+            // Email failure is logged but doesn't affect the guest creation
         }
     }
 
