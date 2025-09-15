@@ -44,6 +44,9 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy built application
 COPY --from=builder /app/dist ./dist
 
+# Copy template files (needed for email templates)
+COPY --from=builder /app/src/modules/mailer/templates ./dist/src/modules/mailer/templates
+
 # Copy Prisma files (essential for migrations)
 COPY --from=builder /app/prisma ./prisma
 
