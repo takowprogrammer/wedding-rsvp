@@ -84,7 +84,7 @@ export class MailerService {
             });
             
             // Provide specific troubleshooting advice
-            if (error.code === 'ETIMEDOUT') {
+            if (error.code === 'ETIMEDOUT' || error.message?.toLowerCase().includes('timeout')) {
                 console.error('💡 [MailerService] TROUBLESHOOTING: Connection timeout detected');
                 console.error('   - Check if SMTP_HOST is correct and reachable');
                 console.error('   - Verify SMTP_PORT is correct (587 for TLS, 465 for SSL)');
