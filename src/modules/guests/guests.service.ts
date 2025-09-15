@@ -71,14 +71,23 @@ export class GuestsService {
     }
 
     private async sendEmailAsync(guest: any, alphanumericCode: string, qrCodeImage: string) {
+        this.logger.log(`🚀 [GuestsService] Starting async email sending for ${guest.email}`);
+        this.logger.log(`   Guest ID: ${guest.id}`);
+        this.logger.log(`   Alphanumeric Code: ${alphanumericCode}`);
+        this.logger.log(`   QR Code Image Size: ${qrCodeImage.length} characters`);
+        
         try {
+            this.logger.log(`📧 [GuestsService] Calling mailer service...`);
             await this.mailerService.sendGuestQrCodeEmail(guest, {
                 alphanumericCode,
                 qrCodeImage,
             });
-            this.logger.log(`Email sent successfully to ${guest.email}`);
+            this.logger.log(`✅ [GuestsService] Email sent successfully to ${guest.email}`);
         } catch (emailError) {
-            this.logger.error(`Failed to send email to ${guest.email}:`, emailError);
+            this.logger.error(`❌ [GuestsService] Failed to send email to ${guest.email}:`, emailError);
+            this.logger.error(`   Error type: ${emailError.constructor.name}`);
+            this.logger.error(`   Error message: ${emailError.message}`);
+            this.logger.error(`   Error code: ${emailError.code || 'N/A'}`);
             // Email failure is logged but doesn't affect the guest creation
         }
     }
