@@ -33,6 +33,12 @@ export class MailerService {
 
     async sendGuestQrCodeEmail(guest: { firstName: string, email: string }, qrCode: { alphanumericCode: string, qrCodeImage: string }) {
         const templatePath = path.join(__dirname, 'templates', 'guest-qr-code.html');
+        
+        // Check if template file exists
+        if (!fs.existsSync(templatePath)) {
+            throw new Error(`Email template not found at: ${templatePath}. Current working directory: ${process.cwd()}, __dirname: ${__dirname}`);
+        }
+        
         let html = fs.readFileSync(templatePath, 'utf-8');
 
         // Replace placeholders with actual values
