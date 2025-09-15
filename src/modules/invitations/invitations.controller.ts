@@ -33,26 +33,20 @@ export class InvitationsController {
         storage: diskStorage({
             destination: (req, file, cb) => {
                 try {
-                    // Save to frontend public/invitations directory
-                    const frontendPath = path.join(process.cwd(), '..', 'rsvp-fe', 'frontend', 'public', 'invitations');
+                    // Save to backend public/invitations directory only
                     const backendPath = path.join(process.cwd(), 'public', 'invitations');
 
-                    console.log(`Attempting to save file to frontend path: ${frontendPath}`);
-                    console.log(`Frontend path exists: ${fs.existsSync(frontendPath)}`);
+                    console.log(`Attempting to save file to backend path: ${backendPath}`);
                     console.log(`Backend path exists: ${fs.existsSync(backendPath)}`);
 
-                    // Try frontend path first, then backend path
-                    if (fs.existsSync(frontendPath)) {
-                        console.log(`Using frontend path: ${frontendPath}`);
-                        cb(null, frontendPath);
-                    } else if (fs.existsSync(backendPath)) {
+                    if (fs.existsSync(backendPath)) {
                         console.log(`Using backend path: ${backendPath}`);
                         cb(null, backendPath);
                     } else {
                         // Create the directory if it doesn't exist
-                        console.log(`Creating frontend directory: ${frontendPath}`);
-                        fs.mkdirSync(frontendPath, { recursive: true });
-                        cb(null, frontendPath);
+                        console.log(`Creating backend directory: ${backendPath}`);
+                        fs.mkdirSync(backendPath, { recursive: true });
+                        cb(null, backendPath);
                     }
                 } catch (error) {
                     console.error('Error setting upload destination:', error);
@@ -124,47 +118,22 @@ export class InvitationsController {
     async deleteTemplate(@Param('filename') filename: string) {
         this.logger.log(`Attempting to delete template: ${filename}`);
 
-        const frontendDir = path.join(process.cwd(), '..', 'rsvp-fe', 'frontend', 'public', 'invitations');
         const backendDir = path.join(process.cwd(), 'public', 'invitations');
 
-        let deletedFrom = [];
-        let errors = [];
-
-        // Try to delete from frontend directory
-        const frontendFilePath = path.join(frontendDir, filename);
-        if (fs.existsSync(frontendFilePath)) {
-            try {
-                fs.unlinkSync(frontendFilePath);
-                deletedFrom.push('frontend');
-                this.logger.log(`Deleted ${filename} from frontend directory`);
-            } catch (error) {
-                errors.push(`Failed to delete from frontend: ${error.message}`);
-                this.logger.error(`Failed to delete ${filename} from frontend:`, error);
-            }
-        }
-
-        // Try to delete from backend directory
+        // Try to delete from backend directory only
         const backendFilePath = path.join(backendDir, filename);
         if (fs.existsSync(backendFilePath)) {
             try {
                 fs.unlinkSync(backendFilePath);
-                deletedFrom.push('backend');
                 this.logger.log(`Deleted ${filename} from backend directory`);
+                return { message: `Template ${filename} deleted successfully` };
             } catch (error) {
-                errors.push(`Failed to delete from backend: ${error.message}`);
                 this.logger.error(`Failed to delete ${filename} from backend:`, error);
+                throw new HttpException(`Failed to delete template: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
             }
+        } else {
+            throw new HttpException(`Template ${filename} not found`, HttpStatus.NOT_FOUND);
         }
-
-        if (deletedFrom.length === 0) {
-            throw new HttpException(`Template file ${filename} not found`, HttpStatus.NOT_FOUND);
-        }
-
-        return {
-            message: `Template ${filename} deleted successfully`,
-            deletedFrom,
-            errors: errors.length > 0 ? errors : undefined
-        };
     }
 
     @Get()
@@ -179,50 +148,26 @@ export class InvitationsController {
 
     @Get('templates')
     async listTemplates() {
-        const frontendDir = path.join(process.cwd(), '..', 'rsvp-fe', 'frontend', 'public', 'invitations');
+        // Only work within the container's public directory
         const backendDir = path.join(process.cwd(), 'public', 'invitations');
 
         this.logger.log('Scanning for invitation templates...');
-        this.logger.log(`Frontend dir: ${frontendDir} (exists: ${fs.existsSync(frontendDir)})`);
         this.logger.log(`Backend dir: ${backendDir} (exists: ${fs.existsSync(backendDir)})`);
 
-        // Ensure frontend directory exists
-        if (!fs.existsSync(frontendDir)) {
-            fs.mkdirSync(frontendDir, { recursive: true });
+        // Ensure backend directory exists (within container)
+        if (!fs.existsSync(backendDir)) {
+            try {
+                fs.mkdirSync(backendDir, { recursive: true });
+                this.logger.log(`Created backend directory: ${backendDir}`);
+            } catch (error) {
+                this.logger.error(`Failed to create backend directory: ${error.message}`);
+                throw new HttpException('Failed to create templates directory', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
 
         const allFiles: any[] = [];
 
-        // First, scan frontend directory
-        try {
-            if (fs.existsSync(frontendDir)) {
-                this.logger.log(`Reading frontend directory: ${frontendDir}`);
-                const files = fs.readdirSync(frontendDir).filter(f =>
-                    f.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/)
-                );
-
-                this.logger.log(`Found ${files.length} image files in frontend:`, files);
-
-                files.forEach(f => {
-                    const filePath = path.join(frontendDir, f);
-                    const stats = fs.statSync(filePath);
-
-                    allFiles.push({
-                        file: f,
-                        templateName: path.parse(f).name,
-                        imageUrl: `/invitations/${f}`,
-                        displayName: path.parse(f).name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                        size: stats.size,
-                        uploadedAt: stats.mtime,
-                        isUploaded: f.includes('-') && /^\d+-\d+/.test(f)
-                    });
-                });
-            }
-        } catch (error) {
-            this.logger.warn(`Could not read frontend directory:`, error);
-        }
-
-        // Then, scan backend directory and copy missing files to frontend
+        // Scan backend directory only (within container)
         try {
             if (fs.existsSync(backendDir)) {
                 this.logger.log(`Reading backend directory: ${backendDir}`);
@@ -234,31 +179,17 @@ export class InvitationsController {
 
                 files.forEach(f => {
                     const backendFilePath = path.join(backendDir, f);
-                    const frontendFilePath = path.join(frontendDir, f);
                     const stats = fs.statSync(backendFilePath);
 
-                    // Copy file to frontend if it doesn't exist there
-                    if (!fs.existsSync(frontendFilePath)) {
-                        try {
-                            fs.copyFileSync(backendFilePath, frontendFilePath);
-                            this.logger.log(`Copied ${f} from backend to frontend`);
-                        } catch (copyError) {
-                            this.logger.warn(`Failed to copy ${f} to frontend:`, copyError);
-                        }
-                    }
-
-                    // Only add to list if not already added from frontend directory
-                    if (!allFiles.some(existing => existing.file === f)) {
-                        allFiles.push({
-                            file: f,
-                            templateName: path.parse(f).name,
-                            imageUrl: `/invitations/${f}`,
-                            displayName: path.parse(f).name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-                            size: stats.size,
-                            uploadedAt: stats.mtime,
-                            isUploaded: f.includes('-') && /^\d+-\d+/.test(f)
-                        });
-                    }
+                    allFiles.push({
+                        file: f,
+                        templateName: path.parse(f).name,
+                        imageUrl: `/invitations/${f}`,
+                        displayName: path.parse(f).name.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                        size: stats.size,
+                        uploadedAt: stats.mtime,
+                        isUploaded: f.includes('-') && /^\d+-\d+/.test(f)
+                    });
                 });
             }
         } catch (error) {
