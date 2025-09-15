@@ -6,6 +6,7 @@ import * as path from 'path';
 @Injectable()
 export class MailerService {
     private transporter: nodemailer.Transporter;
+    private isEmailEnabled: boolean = true;
 
     constructor() {
         console.log('🔧 [MailerService] Initializing email service...');
@@ -38,6 +39,16 @@ export class MailerService {
     private async testConnection() {
         try {
             console.log('🔍 [MailerService] Testing SMTP connection...');
+            console.log('🔍 [MailerService] Full SMTP config:', {
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT || 587),
+                secure: process.env.SMTP_SECURE === 'true',
+                hasAuth: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
+                connectionTimeout: 10000,
+                greetingTimeout: 5000,
+                socketTimeout: 10000
+            });
+            
             await this.transporter.verify();
             console.log('✅ [MailerService] SMTP connection verified successfully');
         } catch (error) {
@@ -48,10 +59,28 @@ export class MailerService {
                 response: error.response,
                 responseCode: error.responseCode
             });
+            
+            // Provide specific troubleshooting advice
+            if (error.code === 'ETIMEDOUT') {
+                console.error('💡 [MailerService] TROUBLESHOOTING: Connection timeout detected');
+                console.error('   - Check if SMTP_HOST is correct and reachable');
+                console.error('   - Verify SMTP_PORT is correct (587 for TLS, 465 for SSL)');
+                console.error('   - Check if Railway has outbound email access');
+                console.error('   - Consider using a different SMTP provider');
+                console.error('⚠️  [MailerService] Disabling email service due to connection failure');
+                this.isEmailEnabled = false;
+            }
         }
     }
 
     async sendMail(options: { to: string; subject: string; html: string; from?: string; attachments?: any[] }): Promise<string> {
+        if (!this.isEmailEnabled) {
+            console.log('⚠️  [MailerService] Email service is disabled due to SMTP connection issues');
+            console.log(`   Would have sent to: ${options.to}`);
+            console.log(`   Subject: ${options.subject}`);
+            throw new Error('Email service is disabled due to SMTP connection issues');
+        }
+
         const from = options.from || process.env.MAIL_FROM || 'no-reply@wedding.local';
         
         console.log('📤 [MailerService] Attempting to send email...');
