@@ -49,6 +49,29 @@ export class MailerService {
                 socketTimeout: 10000
             });
             
+            // Test basic connectivity first
+            console.log('🔍 [MailerService] Testing basic connectivity...');
+            const net = require('net');
+            const socket = new net.Socket();
+            
+            await new Promise((resolve, reject) => {
+                socket.setTimeout(5000);
+                socket.connect(Number(process.env.SMTP_PORT || 587), process.env.SMTP_HOST, () => {
+                    console.log('✅ [MailerService] Basic connectivity test passed');
+                    socket.destroy();
+                    resolve(true);
+                });
+                socket.on('error', (err) => {
+                    console.error('❌ [MailerService] Basic connectivity test failed:', err.message);
+                    reject(err);
+                });
+                socket.on('timeout', () => {
+                    console.error('❌ [MailerService] Basic connectivity test timed out');
+                    socket.destroy();
+                    reject(new Error('Connection timeout'));
+                });
+            });
+            
             await this.transporter.verify();
             console.log('✅ [MailerService] SMTP connection verified successfully');
         } catch (error) {
