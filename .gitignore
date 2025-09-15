@@ -87,5 +87,9 @@ jspm_packages/
 # TernJS port file
 .tern-port
 
+# Test files
+test-*.js
+*.test.js
+
 # Specific files
 dione.txt
