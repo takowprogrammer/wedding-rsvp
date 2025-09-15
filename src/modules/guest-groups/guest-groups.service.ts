@@ -19,38 +19,112 @@ export class GuestGroupsService {
         return await this.prisma.guestGroup.findUnique({ where: { id } });
     }
 
+    async cleanupDuplicateGroups() {
+        // Define groups to consolidate
+        const groupMappings = {
+            'Family of the Bride': 'Bride\'s Family',
+            'Family of Bride': 'Bride\'s Family',
+            'Family of the Groom': 'Groom\'s Family',
+            'Family of Groom': 'Groom\'s Family',
+            'Extended Family - Bride': 'Extended Family',
+            'Extended Family - Groom': 'Extended Family',
+            'Friends of the Bride': 'Bride\'s Friends',
+            'Friends of Bride': 'Bride\'s Friends',
+            'Friends of the Groom': 'Groom\'s Friends',
+            'Friends of Groom': 'Groom\'s Friends',
+            'Colleagues of the Bride': 'Work Colleagues',
+            'Colleagues of the Groom': 'Work Colleagues',
+            'Colleagues': 'Work Colleagues',
+            'Classmates of the Bride': 'University Alumni',
+            'Classmates of the Groom': 'University Alumni',
+            'Work Colleagues': 'Work Colleagues'
+        };
+
+        const consolidatedGroups: Record<string, { id: string; name: string; originalGroups: string[] }> = {};
+
+        // Get all existing groups
+        const allGroups = await this.prisma.guestGroup.findMany();
+        
+        for (const group of allGroups) {
+            const newName = groupMappings[group.name] || group.name;
+            
+            if (!consolidatedGroups[newName]) {
+                consolidatedGroups[newName] = {
+                    id: group.id,
+                    name: newName,
+                    originalGroups: [group.name]
+                };
+            } else {
+                consolidatedGroups[newName].originalGroups.push(group.name);
+            }
+        }
+
+        // Update groups to consolidated names
+        for (const [newName, data] of Object.entries(consolidatedGroups)) {
+            if (data.originalGroups.length > 1 || data.originalGroups[0] !== newName) {
+                await this.prisma.guestGroup.update({
+                    where: { id: data.id },
+                    data: { name: newName }
+                });
+            }
+        }
+
+        // Delete duplicate groups (keep the first one, delete others)
+        for (const [newName, data] of Object.entries(consolidatedGroups)) {
+            if (data.originalGroups.length > 1) {
+                const groupsToDelete = allGroups.filter(g =>
+                    data.originalGroups.includes(g.name) && g.id !== data.id
+                );
+
+                for (const groupToDelete of groupsToDelete) {
+                    // First, move any guests from deleted group to the consolidated group
+                    await this.prisma.guest.updateMany({
+                        where: { groupId: groupToDelete.id },
+                        data: { groupId: data.id }
+                    });
+
+                    // Then delete the duplicate group
+                    await this.prisma.guestGroup.delete({
+                        where: { id: groupToDelete.id }
+                    });
+                }
+            }
+        }
+
+        return {
+            message: 'Duplicate groups cleaned up and consolidated',
+            consolidatedGroups: Object.keys(consolidatedGroups)
+        };
+    }
+
     async seedDefaultGroups() {
         const defaultGroups = [
             // Family categories
-            'Family of the Bride',
-            'Family of the Groom',
-            'Extended Family - Bride',
-            'Extended Family - Groom',
-            
+            'Bride\'s Family',
+            'Groom\'s Family',
+            'Extended Family',
+
             // Friends categories
-            'Friends of the Bride',
-            'Friends of the Groom',
+            'Bride\'s Friends',
+            'Groom\'s Friends',
             'Mutual Friends',
             'College Friends',
             'High School Friends',
-            
+
             // Work/Professional categories
-            'Colleagues of the Bride',
-            'Colleagues of the Groom',
+            'Work Colleagues',
             'Business Associates',
-            
+
             // Educational categories
-            'Classmates of the Bride',
-            'Classmates of the Groom',
             'University Alumni',
-            
+
             // Other categories
             'Neighbors',
             'Family Friends',
             'Religious Community',
             'Sports/Activity Groups'
         ];
-        
+
         const createdGroups = [];
 
         for (const groupName of defaultGroups) {

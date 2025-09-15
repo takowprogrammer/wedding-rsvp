@@ -56,6 +56,22 @@ export class GuestGroupsController {
         }
     }
 
+    @Get('cleanup')
+    async cleanup() {
+        this.logger.log('Manual cleanup triggered');
+        try {
+            const result = await this.guestGroupsService.cleanupDuplicateGroups();
+            return {
+                message: 'Cleanup completed',
+                result,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            this.logger.error('Cleanup error:', error);
+            return { error: error.message, timestamp: new Date().toISOString() };
+        }
+    }
+
     @Post()
     @UseGuards(JwtAuthGuard)
     async create(@Body() createGuestGroupDto: CreateGuestGroupDto) {

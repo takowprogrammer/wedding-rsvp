@@ -35,8 +35,9 @@ export class MailerService {
         const templatePath = path.join(__dirname, 'templates', 'guest-qr-code.html');
         let html = fs.readFileSync(templatePath, 'utf-8');
 
-        html = html.replace('__GUEST_NAME__', guest.firstName);
-        html = html.replace('__ALPHANUMERIC_CODE__', qrCode.alphanumericCode);
+        // Replace placeholders with actual values
+        html = html.replace(/__GUEST_NAME__/g, guest.firstName);
+        html = html.replace(/__ALPHANUMERIC_CODE__/g, qrCode.alphanumericCode);
 
         const mailOptions = {
             to: guest.email,

@@ -200,9 +200,6 @@ export class GuestsService {
 
         const skip = (page - 1) * limit;
 
-        console.log(`Finding all admin guests in service... Page: ${page}, Limit: ${limit}, GroupId: ${groupId}, Search: ${search}`);
-        console.log('Where clause:', JSON.stringify(where, null, 2));
-        
         const [guests, total] = await this.prisma.$transaction([
             this.prisma.guest.findMany({
                 where,
@@ -219,7 +216,6 @@ export class GuestsService {
             this.prisma.guest.count({ where }),
         ]);
 
-        console.log(`Guests found in service: ${guests.length}, Total: ${total}`);
         return { guests, total };
     }
 
