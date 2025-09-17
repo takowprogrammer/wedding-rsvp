@@ -1,5 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { GuestsModule } from './modules/guests/guests.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { QrCodesModule } from './modules/qr-codes/qr-codes.module';
@@ -15,6 +17,11 @@ import { AuthModule } from './modules/auth/auth.module';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
+        }),
+        ServeStaticModule.forRoot({
+            // This path now correctly points to the 'public' folder inside 'dist'
+            rootPath: join(__dirname, '..', 'public'),
+            serveRoot: '/invitations', // Serve files from /invitations path
         }),
         PrismaModule,
 

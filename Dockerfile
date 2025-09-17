@@ -47,6 +47,9 @@ COPY --from=builder /app/dist ./dist
 # Copy template files (needed for email templates)
 COPY --from=builder /app/src/modules/mailer/templates ./dist/src/modules/mailer/templates
 
+# Copy invitation templates from the public directory
+COPY --from=builder /app/public ./dist/public
+
 # Copy Prisma files (essential for migrations)
 COPY --from=builder /app/prisma ./prisma
 

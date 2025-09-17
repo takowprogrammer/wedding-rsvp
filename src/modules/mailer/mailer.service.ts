@@ -1,186 +1,144 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
 export class MailerService {
-    private transporter: nodemailer.Transporter;
+    private resend: Resend;
     private isEmailEnabled: boolean = true;
+    private apiKey: string | undefined;
 
     constructor() {
-        console.log('🔧 [MailerService] Initializing email service...');
-        console.log('📧 [MailerService] SMTP Configuration:');
-        console.log(`   Host: ${process.env.SMTP_HOST || 'NOT SET'}`);
-        console.log(`   Port: ${process.env.SMTP_PORT || '587'}`);
-        console.log(`   Secure: ${process.env.SMTP_SECURE === 'true'}`);
-        console.log(`   User: ${process.env.SMTP_USER ? 'SET' : 'NOT SET'}`);
-        console.log(`   Pass: ${process.env.SMTP_PASS ? 'SET' : 'NOT SET'}`);
-        console.log(`   From: ${process.env.MAIL_FROM || 'NOT SET'}`);
+        console.log('🔧 [MailerService] Initializing Resend email service...');
+        this.apiKey = process.env.RESEND_API_KEY;
 
-        this.transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT || 587),
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: process.env.SMTP_USER && process.env.SMTP_PASS ? {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            } : undefined,
-            // Add timeout configuration
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 5000,    // 5 seconds
-            socketTimeout: 10000,     // 10 seconds
-        });
-
-        // Test SMTP connection on startup
-        this.testConnection();
+        if (!this.apiKey) {
+            console.log('⚠️  [MailerService] RESEND_API_KEY is not set. Disabling email service.');
+            this.isEmailEnabled = false;
+            this.resend = null as any; // Avoid TS error
+        } else {
+            console.log('✅ [MailerService] Resend API key is set.');
+            console.log(`   API Key length: ${this.apiKey.length}`);
+            console.log(`   API Key prefix: ${this.apiKey.substring(0, 8)}...`);
+            console.log(`   API Key suffix: ...${this.apiKey.substring(this.apiKey.length - 4)}`);
+            this.resend = new Resend(this.apiKey);
+            this.isEmailEnabled = true; // Assume enabled if key is present
+        }
     }
 
     private async testConnection() {
-        try {
-            console.log('🔍 [MailerService] Testing SMTP connection...');
-            console.log('🔍 [MailerService] Full SMTP config:', {
-                host: process.env.SMTP_HOST,
-                port: Number(process.env.SMTP_PORT || 587),
-                secure: process.env.SMTP_SECURE === 'true',
-                hasAuth: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
-                connectionTimeout: 10000,
-                greetingTimeout: 5000,
-                socketTimeout: 10000
-            });
-            
-            // Test basic connectivity first
-            console.log('🔍 [MailerService] Testing basic connectivity...');
-            const net = require('net');
-            const socket = new net.Socket();
-            
-            await new Promise((resolve, reject) => {
-                socket.setTimeout(5000);
-                socket.connect(Number(process.env.SMTP_PORT || 587), process.env.SMTP_HOST, () => {
-                    console.log('✅ [MailerService] Basic connectivity test passed');
-                    socket.destroy();
-                    resolve(true);
-                });
-                socket.on('error', (err) => {
-                    console.error('❌ [MailerService] Basic connectivity test failed:', err.message);
-                    reject(err);
-                });
-                socket.on('timeout', () => {
-                    console.error('❌ [MailerService] Basic connectivity test timed out');
-                    socket.destroy();
-                    reject(new Error('Connection timeout'));
-                });
-            });
-            
-            await this.transporter.verify();
-            console.log('✅ [MailerService] SMTP connection verified successfully');
-        } catch (error) {
-            console.error('❌ [MailerService] SMTP connection failed:', error.message);
-            console.error('🔍 [MailerService] Error details:', {
-                code: error.code,
-                command: error.command,
-                response: error.response,
-                responseCode: error.responseCode
-            });
-            
-            // Provide specific troubleshooting advice
-            if (error.code === 'ETIMEDOUT' || error.message?.toLowerCase().includes('timeout')) {
-                console.error('💡 [MailerService] TROUBLESHOOTING: Connection timeout detected');
-                console.error('   - Check if SMTP_HOST is correct and reachable');
-                console.error('   - Verify SMTP_PORT is correct (587 for TLS, 465 for SSL)');
-                console.error('   - Check if Railway has outbound email access');
-                console.error('   - Consider using a different SMTP provider');
-                console.error('⚠️  [MailerService] Disabling email service due to connection failure');
-                this.isEmailEnabled = false;
-            }
-        }
+        // This method is no longer needed and is the source of the API key error.
+        // Keeping it here but empty to avoid breaking other parts of the code if it were called elsewhere.
     }
 
     async sendMail(options: { to: string; subject: string; html: string; from?: string; attachments?: any[] }): Promise<string> {
         if (!this.isEmailEnabled) {
-            console.log('⚠️  [MailerService] Email service is disabled due to SMTP connection issues');
+            const errorMessage = 'Email service is disabled. Check logs for RESEND_API_KEY or connection issues.';
+            console.log(`⚠️  [MailerService] ${errorMessage}`);
             console.log(`   Would have sent to: ${options.to}`);
             console.log(`   Subject: ${options.subject}`);
-            throw new Error('Email service is disabled due to SMTP connection issues');
+            throw new Error(errorMessage);
         }
 
-        const from = options.from || process.env.MAIL_FROM || 'no-reply@wedding.local';
-        
-        console.log('📤 [MailerService] Attempting to send email...');
+        let from = options.from || process.env.MAIL_FROM || 'onboarding@resend.dev';
+        if (!from) {
+            const errorMessage = 'MAIL_FROM environment variable is not set.';
+            console.error(`❌ [MailerService] ${errorMessage}`);
+            throw new Error(errorMessage);
+        }
+
+        // Ensure the from field is properly formatted for Resend
+        // Resend expects either "email@example.com" or "Name <email@example.com>"
+        if (from.includes('<') && !from.endsWith('>')) {
+            from = from + '>';
+            console.log(`🔧 [MailerService] Fixed malformed from field: ${from}`);
+        }
+
+        // Check if using a domain that needs verification
+        if (from.includes('@gmail.com') || from.includes('@yahoo.com') || from.includes('@hotmail.com')) {
+            console.log('⚠️  [MailerService] Using a public email domain. Consider using your own verified domain or onboarding@resend.dev for testing.');
+        }
+
+        // Additional validation for Resend format
+        if (!from.match(/^[^<]+<[^>]+>$/)) {
+            // If it doesn't match the "Name <email>" format, check if it's just an email
+            if (!from.match(/^[^\s<]+@[^\s>]+$/)) {
+                console.warn(`⚠️  [MailerService] From field may not be properly formatted: ${from}`);
+            }
+        }
+
+        console.log('📤 [MailerService] Attempting to send email via Resend...');
         console.log(`   To: ${options.to}`);
         console.log(`   From: ${from}`);
         console.log(`   Subject: ${options.subject}`);
         console.log(`   Has attachments: ${options.attachments ? options.attachments.length : 0}`);
-        
+
         const startTime = Date.now();
-        
+
         try {
-            const info = await this.transporter.sendMail({
-                from,
+            console.log('🔍 [MailerService] Sending request to Resend API...');
+            console.log(`   API Key present: ${!!this.apiKey}`);
+            console.log(`   API Key length: ${this.apiKey?.length || 0}`);
+            console.log(`   API Key prefix: ${this.apiKey?.substring(0, 8) || 'N/A'}...`);
+
+            const { data, error } = await this.resend.emails.send({
+                from: from,
                 to: options.to,
                 subject: options.subject,
                 html: options.html,
                 attachments: options.attachments,
             });
-            
+
+            if (error) {
+                console.error('❌ [MailerService] Failed to send email via Resend:', error);
+                console.error('   Error details:', JSON.stringify(error, null, 2));
+                throw new Error(`Failed to send email: ${error.message}`);
+            }
+
             const duration = Date.now() - startTime;
             console.log(`✅ [MailerService] Email sent successfully in ${duration}ms`);
-            console.log(`   Message ID: ${info.messageId}`);
-            console.log(`   Response: ${info.response}`);
-            
-            return info.messageId as string;
-        } catch (error) {
+            console.log(`   Message ID: ${data?.id}`);
+            return data?.id ?? 'unknown-id';
+        } catch (error: any) {
             const duration = Date.now() - startTime;
-            console.error(`❌ [MailerService] Email sending failed after ${duration}ms`);
-            console.error(`   Error: ${error.message}`);
-            console.error(`   Code: ${error.code}`);
-            console.error(`   Command: ${error.command}`);
-            console.error(`   Response: ${error.response}`);
-            console.error(`   Response Code: ${error.responseCode}`);
+            console.error(`❌ [MailerService] Error sending email after ${duration}ms:`, error);
+            console.error('   Error type:', error.constructor.name);
+            console.error('   Error message:', error.message);
+            console.error('   Error code:', error.code || 'N/A');
+            console.error('   Error status:', error.status || 'N/A');
+
+            if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+                throw new Error('Email service is unavailable. Please check your internet connection and try again.');
+            }
+
+            if (error.message?.includes('Unable to fetch data')) {
+                throw new Error('Network error: Unable to connect to email service. Please check your internet connection.');
+            }
+
+            if (error.message?.includes('validation_error')) {
+                throw new Error(`Email validation error: ${error.message}`);
+            }
+
             throw error;
         }
     }
 
-    async sendGuestQrCodeEmail(guest: { firstName: string, email: string }, qrCode: { alphanumericCode: string, qrCodeImage: string }) {
-        console.log('🎯 [MailerService] Preparing QR code email...');
-        console.log(`   Guest: ${guest.firstName} (${guest.email})`);
-        console.log(`   QR Code: ${qrCode.alphanumericCode}`);
-        
-        const templatePath = path.join(__dirname, 'templates', 'guest-qr-code.html');
-        console.log(`   Template path: ${templatePath}`);
-        
-        // Check if template file exists
-        if (!fs.existsSync(templatePath)) {
-            const error = `Email template not found at: ${templatePath}. Current working directory: ${process.cwd()}, __dirname: ${__dirname}`;
-            console.error('❌ [MailerService]', error);
-            throw new Error(error);
+    // Helper to read email templates (no change needed here)
+    readTemplate(templateName: string): string {
+        try {
+            const templatePath = path.join(
+                process.cwd(),
+                'dist', // or 'src' if you are running in dev mode with ts-node
+                'modules',
+                'mailer',
+                'templates',
+                templateName,
+            );
+            return fs.readFileSync(templatePath, 'utf-8');
+        } catch (error) {
+            console.error(`❌ [MailerService] Error reading email template "${templateName}":`, error);
+            throw new Error(`Template not found: ${templateName}`);
         }
-        
-        console.log('✅ [MailerService] Template file found, reading content...');
-        let html = fs.readFileSync(templatePath, 'utf-8');
-        console.log(`   Template size: ${html.length} characters`);
-
-        // Replace placeholders with actual values
-        html = html.replace(/__GUEST_NAME__/g, guest.firstName);
-        html = html.replace(/__ALPHANUMERIC_CODE__/g, qrCode.alphanumericCode);
-        console.log('✅ [MailerService] Template placeholders replaced');
-
-        const qrCodeImageSize = qrCode.qrCodeImage.length;
-        console.log(`   QR Code image size: ${qrCodeImageSize} characters`);
-
-        const mailOptions = {
-            to: guest.email,
-            subject: 'Your QR Code for the Event',
-            html,
-            attachments: [{
-                filename: 'qrcode.png',
-                content: qrCode.qrCodeImage.split(';base64,').pop(),
-                encoding: 'base64',
-                cid: 'qrcode'
-            }]
-        };
-
-        console.log('📧 [MailerService] Calling sendMail with prepared options...');
-        return this.sendMail(mailOptions);
     }
 } 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,7 @@
             margin: 0;
             padding: 20px;
         }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -21,26 +23,31 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-align: center;
             padding: 30px 20px;
         }
+
         .header h1 {
             margin: 0;
             font-size: 28px;
             font-weight: 600;
         }
+
         .content {
             padding: 30px;
             text-align: center;
         }
+
         .welcome-text {
             font-size: 16px;
             margin-bottom: 30px;
             color: #555;
         }
+
         .qr-section {
             background-color: #f8f9fa;
             border-radius: 8px;
@@ -48,18 +55,22 @@
             margin: 25px 0;
             border: 2px solid #e9ecef;
         }
+
         .qr-code {
             margin: 20px 0;
         }
+
         .qr-code img {
             max-width: 200px;
             height: auto;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
+
         .download-section {
             margin: 20px 0;
         }
+
         .download-btn {
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -71,9 +82,11 @@
             margin: 5px;
             transition: transform 0.2s;
         }
+
         .download-btn:hover {
             transform: translateY(-2px);
         }
+
         .code-section {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -81,12 +94,14 @@
             padding: 20px;
             margin: 25px 0;
         }
+
         .code-label {
             font-size: 14px;
             color: #856404;
             margin-bottom: 10px;
             font-weight: 600;
         }
+
         .alphanumeric-code {
             font-family: 'Courier New', monospace;
             font-size: 24px;
@@ -99,6 +114,7 @@
             letter-spacing: 2px;
             margin: 10px 0;
         }
+
         .instructions {
             background-color: #d1ecf1;
             border: 1px solid #bee5eb;
@@ -107,10 +123,12 @@
             margin: 25px 0;
             color: #0c5460;
         }
+
         .instructions h3 {
             margin-top: 0;
             color: #0c5460;
         }
+
         .footer {
             background-color: #f8f9fa;
             text-align: center;
@@ -118,9 +136,11 @@
             color: #6c757d;
             border-top: 1px solid #e9ecef;
         }
+
         .footer p {
             margin: 5px 0;
         }
+
         .highlight {
             background-color: #fff3cd;
             padding: 2px 6px;
@@ -129,6 +149,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -136,8 +157,9 @@
         </div>
         <div class="content">
             <p class="welcome-text">Hello <strong>__GUEST_NAME__</strong>,</p>
-            <p class="welcome-text">We are absolutely thrilled to have you join us for our special event! Your RSVP has been confirmed and we've prepared your personal check-in credentials.</p>
-            
+            <p class="welcome-text">We are absolutely thrilled to have you join us for our special event! Your RSVP has
+                been confirmed and we've prepared your personal check-in credentials.</p>
+
             <!-- QR Code Section -->
             <div class="qr-section">
                 <h3 style="margin-top: 0; color: #333;">📱 Your QR Code</h3>
@@ -145,7 +167,7 @@
                     <img src="cid:qrcode" alt="Your Personal QR Code" title="Your QR Code for Event Check-in">
                 </div>
                 <div class="download-section">
-                    <a href="cid:qrcode" download="qr-code-__ALPHANUMERIC_CODE__.png" class="download-btn">
+                    <a href="__QR_CODE_DATA_URL__" download="qr-code-__ALPHANUMERIC_CODE__.png" class="download-btn">
                         📥 Download QR Code
                     </a>
                 </div>
@@ -164,7 +186,8 @@
             <div class="instructions">
                 <h3>📋 Check-in Instructions</h3>
                 <p><strong>Option 1:</strong> Show your QR code on your phone (saved image or this email)</p>
-                <p><strong>Option 2:</strong> Tell our staff your code: <span class="highlight">__ALPHANUMERIC_CODE__</span></p>
+                <p><strong>Option 2:</strong> Tell our staff your code: <span
+                        class="highlight">__ALPHANUMERIC_CODE__</span></p>
                 <p><strong>Pro tip:</strong> Save this email or take a screenshot of your QR code for easy access!</p>
             </div>
 
@@ -180,4 +203,5 @@
         </div>
     </div>
 </body>
+
 </html>

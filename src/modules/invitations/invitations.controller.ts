@@ -33,21 +33,17 @@ export class InvitationsController {
         storage: diskStorage({
             destination: (req, file, cb) => {
                 try {
-                    // Save to backend public/invitations directory only
-                    const backendPath = path.join(process.cwd(), 'public', 'invitations');
+                    // Save to the 'dist' directory, which is the running application's root
+                    const backendPath = path.join(__dirname, '..', '..', '..', 'public', 'invitations');
 
-                    console.log(`Attempting to save file to backend path: ${backendPath}`);
-                    console.log(`Backend path exists: ${fs.existsSync(backendPath)}`);
+                    console.log(`Attempting to save file to running app path: ${backendPath}`);
+                    console.log(`Path exists: ${fs.existsSync(backendPath)}`);
 
-                    if (fs.existsSync(backendPath)) {
-                        console.log(`Using backend path: ${backendPath}`);
-                        cb(null, backendPath);
-                    } else {
-                        // Create the directory if it doesn't exist
-                        console.log(`Creating backend directory: ${backendPath}`);
+                    if (!fs.existsSync(backendPath)) {
+                        console.log(`Creating directory: ${backendPath}`);
                         fs.mkdirSync(backendPath, { recursive: true });
-                        cb(null, backendPath);
                     }
+                    cb(null, backendPath);
                 } catch (error) {
                     console.error('Error setting upload destination:', error);
                     cb(error, '');
@@ -118,7 +114,7 @@ export class InvitationsController {
     async deleteTemplate(@Param('filename') filename: string) {
         this.logger.log(`Attempting to delete template: ${filename}`);
 
-        const backendDir = path.join(process.cwd(), 'public', 'invitations');
+        const backendDir = path.join(__dirname, '..', '..', '..', 'public', 'invitations');
 
         // Try to delete from backend directory only
         const backendFilePath = path.join(backendDir, filename);
@@ -148,8 +144,8 @@ export class InvitationsController {
 
     @Get('templates')
     async listTemplates() {
-        // Only work within the container's public directory
-        const backendDir = path.join(process.cwd(), 'public', 'invitations');
+        // This path now correctly points to the 'public' folder inside 'dist'
+        const backendDir = path.join(__dirname, '..', '..', '..', 'public', 'invitations');
 
         this.logger.log('Scanning for invitation templates...');
         this.logger.log(`Backend dir: ${backendDir} (exists: ${fs.existsSync(backendDir)})`);
@@ -216,6 +212,29 @@ export class InvitationsController {
             throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
         }
         return invitation;
+    }
+
+    @Get('image/:filename')
+    async getImage(@Param('filename') filename: string, @Res() res: Response) {
+        try {
+            // __dirname in compiled code is dist/src/modules/invitations/
+            // We need to go up to dist/ and then into public/invitations/
+            const imagePath = path.join(__dirname, '..', '..', '..', 'public', 'invitations', filename);
+
+            console.log(`Looking for image at: ${imagePath}`);
+            console.log(`File exists: ${fs.existsSync(imagePath)}`);
+
+            if (!fs.existsSync(imagePath)) {
+                console.log(`Image not found: ${filename}`);
+                throw new HttpException('Image not found', HttpStatus.NOT_FOUND);
+            }
+
+            res.setHeader('Content-Type', 'image/jpeg');
+            res.sendFile(imagePath);
+        } catch (error) {
+            console.log(`Error serving image ${filename}:`, error.message);
+            throw new HttpException('Image not found', HttpStatus.NOT_FOUND);
+        }
     }
 
     @Get(':id/preview')

@@ -91,5 +91,20 @@ jspm_packages/
 test-*.js
 *.test.js
 
+# Markdown files
+*.md
+
+# Environment backup files
+.env.backup
+
+# Cloud build configuration
+cloudbuild.yaml
+
+# One-time migration scripts
+cleanup-groups.js
+
+# Test files
+cors-test.html
+
 # Specific files
 dione.txt

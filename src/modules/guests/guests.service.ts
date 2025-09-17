@@ -75,13 +75,31 @@ export class GuestsService {
         this.logger.log(`   Guest ID: ${guest.id}`);
         this.logger.log(`   Alphanumeric Code: ${alphanumericCode}`);
         this.logger.log(`   QR Code Image Size: ${qrCodeImage.length} characters`);
-        
+
         try {
             this.logger.log(`📧 [GuestsService] Calling mailer service...`);
-            await this.mailerService.sendGuestQrCodeEmail(guest, {
-                alphanumericCode,
-                qrCodeImage,
-            });
+
+            // Read and prepare the email template
+            let html = this.mailerService.readTemplate('guest-qr-code.html');
+            html = html.replace(/__GUEST_NAME__/g, guest.firstName);
+            html = html.replace(/__ALPHANUMERIC_CODE__/g, alphanumericCode);
+            // Replace CID with data URL for better email client compatibility
+            html = html.replace(/cid:qrcode/g, qrCodeImage);
+            // Replace download link placeholder with data URL
+            html = html.replace(/__QR_CODE_DATA_URL__/g, qrCodeImage);
+
+            const mailOptions = {
+                to: guest.email,
+                subject: 'Your Wedding Invitation QR Code',
+                html,
+                attachments: [{
+                    filename: `qrcode-${alphanumericCode}.png`,
+                    content: qrCodeImage.split(';base64,').pop(),
+                    encoding: 'base64'
+                }]
+            };
+
+            await this.mailerService.sendMail(mailOptions);
             this.logger.log(`✅ [GuestsService] Email sent successfully to ${guest.email}`);
         } catch (emailError) {
             this.logger.error(`❌ [GuestsService] Failed to send email to ${guest.email}:`, emailError);

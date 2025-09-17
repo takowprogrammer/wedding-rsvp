@@ -26,7 +26,8 @@ async function bootstrap() {
             // Allow your production domains
             const allowedOrigins = [
                 'https://wedding-rsvp-production.up.railway.app',
-                'https://rsvp-fe-lovat.vercel.app',
+                'https://emmaris25.com',
+                'https://rsvp-fe-lovat.vercel.app'
             ];
             
             if (allowedOrigins.includes(origin)) {
