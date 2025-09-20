@@ -144,8 +144,8 @@ export class InvitationsController {
 
     @Get('templates')
     async listTemplates() {
-        // This path now correctly points to the 'public' folder inside 'dist'
-        const backendDir = path.join(__dirname, '..', '..', '..', 'public', 'invitations');
+        // Use process.cwd() to get the project root, then go to public/invitations
+        const backendDir = path.join(process.cwd(), 'public', 'invitations');
 
         this.logger.log('Scanning for invitation templates...');
         this.logger.log(`Backend dir: ${backendDir} (exists: ${fs.existsSync(backendDir)})`);
@@ -207,7 +207,7 @@ export class InvitationsController {
 
     @Get(':id')
     async findOne(@Param('id') id: string) {
-        const invitation = await this.invitationsService.findOne(id);
+        const invitation = await this.invitationsService.findOneWithProcessedImage(id);
         if (!invitation) {
             throw new HttpException('Invitation not found', HttpStatus.NOT_FOUND);
         }
@@ -218,8 +218,8 @@ export class InvitationsController {
     async getImage(@Param('filename') filename: string, @Res() res: Response) {
         try {
             // __dirname in compiled code is dist/src/modules/invitations/
-            // We need to go up to dist/ and then into public/invitations/
-            const imagePath = path.join(__dirname, '..', '..', '..', 'public', 'invitations', filename);
+            // We need to go up to the project root and then into public/invitations/
+            const imagePath = path.join(process.cwd(), 'public', 'invitations', filename);
 
             console.log(`Looking for image at: ${imagePath}`);
             console.log(`File exists: ${fs.existsSync(imagePath)}`);

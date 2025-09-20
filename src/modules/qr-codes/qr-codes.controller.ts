@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, HttpException, HttpStatus, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { QrCodesService } from './qr-codes.service';
 
 @Controller('qr-codes')
@@ -40,6 +41,29 @@ export class QrCodesController {
                 { success: false, message: (error as Error).message },
                 HttpStatus.BAD_REQUEST
             );
+        }
+    }
+
+    @Get('guest/:guestId/image')
+    async getQrImageByGuest(
+        @Param('guestId') guestId: string,
+        @Res() res: Response,
+    ) {
+        try {
+            const qrCode = await this.qrCodesService.findByGuestId(guestId);
+            if (!qrCode) {
+                throw new HttpException('QR code not found', HttpStatus.NOT_FOUND);
+            }
+
+            const dataUrl = await this.qrCodesService.generateQrCodeImage(qrCode.qrCodeData);
+            const base64 = dataUrl.split(',')[1] || '';
+            const buffer = Buffer.from(base64, 'base64');
+
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            res.send(buffer);
+        } catch (error) {
+            throw new HttpException('Failed to generate QR image', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

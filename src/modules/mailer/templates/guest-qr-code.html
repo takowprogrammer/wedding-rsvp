@@ -74,13 +74,18 @@
         .download-btn {
             display: inline-block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background-color: #667eea;
+            /* Fallback for clients that ignore gradients */
+            color: #ffffff !important;
+            /* Ensure visible on Outlook */
             padding: 12px 24px;
-            text-decoration: none;
+            text-decoration: none !important;
             border-radius: 6px;
             font-weight: 600;
             margin: 5px;
             transition: transform 0.2s;
+            border: 1px solid #5a66d6;
+            /* Improve visibility in Outlook */
         }
 
         .download-btn:hover {
@@ -167,8 +172,8 @@
                     <img src="cid:qrcode" alt="Your Personal QR Code" title="Your QR Code for Event Check-in">
                 </div>
                 <div class="download-section">
-                    <a href="__QR_CODE_DATA_URL__" download="qr-code-__ALPHANUMERIC_CODE__.png" class="download-btn">
-                        📥 Download QR Code
+                    <a href="__QR_CODE_DATA_URL__" target="_blank" rel="noopener" class="download-btn">
+                        📥 View/Download QR Code
                     </a>
                 </div>
             </div>

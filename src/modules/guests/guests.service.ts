@@ -83,15 +83,19 @@ export class GuestsService {
             let html = this.mailerService.readTemplate('guest-qr-code.html');
             html = html.replace(/__GUEST_NAME__/g, guest.firstName);
             html = html.replace(/__ALPHANUMERIC_CODE__/g, alphanumericCode);
-            // Replace CID with data URL for better email client compatibility
-            html = html.replace(/cid:qrcode/g, qrCodeImage);
-            // Replace download link placeholder with data URL
-            html = html.replace(/__QR_CODE_DATA_URL__/g, qrCodeImage);
+            // Build public URL to render QR as an image inside email content
+            const backendBase = process.env.PUBLIC_BACKEND_URL || process.env.BACKEND_PUBLIC_URL || 'http://localhost:5000';
+            const qrPublicUrl = `${backendBase}/api/qr-codes/guest/${guest.id}/image`;
+            // Replace CID placeholder with public URL so Gmail/Hotmail render inline
+            html = html.replace(/cid:qrcode/g, qrPublicUrl);
+            // Replace download link placeholder with public URL
+            html = html.replace(/__QR_CODE_DATA_URL__/g, qrPublicUrl);
 
             const mailOptions = {
                 to: guest.email,
                 subject: 'Your Wedding Invitation QR Code',
                 html,
+                // Keep attachment for convenience
                 attachments: [{
                     filename: `qrcode-${alphanumericCode}.png`,
                     content: qrCodeImage.split(';base64,').pop(),

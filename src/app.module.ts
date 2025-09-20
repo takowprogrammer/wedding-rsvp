@@ -19,9 +19,9 @@ import { AuthModule } from './modules/auth/auth.module';
             isGlobal: true,
         }),
         ServeStaticModule.forRoot({
-            // This path now correctly points to the 'public' folder inside 'dist'
-            rootPath: join(__dirname, '..', 'public'),
-            serveRoot: '/invitations', // Serve files from /invitations path
+            // Use process.cwd() to get the project root, then go to public/invitations
+            rootPath: join(process.cwd(), 'public', 'invitations'),
+            serveRoot: '/static', // Serve files from /static path to avoid API conflicts
         }),
         PrismaModule,
 

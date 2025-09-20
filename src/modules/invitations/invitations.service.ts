@@ -58,6 +58,17 @@ export class InvitationsService {
         return invitation;
     }
 
+    async findOneWithProcessedImage(id: string) {
+        const invitation = await this.findOne(id);
+        this.logger.log(`Processing image for invitation: ${invitation.templateName}, original imageUrl: ${invitation.imageUrl}`);
+        const processedImageUrl = this.getTemplateImageUrl(invitation.templateName, invitation.imageUrl);
+        this.logger.log(`Processed imageUrl: ${processedImageUrl}`);
+        return {
+            ...invitation,
+            imageUrl: processedImageUrl
+        };
+    }
+
     async remove(id: string) {
         const invitation = await this.findOne(id);
         await this.prisma.invitation.delete({
@@ -76,9 +87,31 @@ export class InvitationsService {
     private getTemplateImageUrl(templateName?: string, providedImageUrl?: string): string | undefined {
         if (providedImageUrl) return providedImageUrl;
         if (!templateName) return undefined;
-        // map template name to png in public/invitations
+
+        // Map common template names to actual files
+        const templateMap: { [key: string]: string } = {
+            'default wedding invitation': 'template1.jpg',
+            'template1': 'template1.jpg',
+            'template3': 'template3.jpg',
+            'classic': 'template1.jpg',
+            'modern': 'template3.jpg'
+        };
+
+        const normalizedName = templateName.trim().toLowerCase();
+        this.logger.log(`Looking for template mapping for: "${normalizedName}"`);
+        const mappedFile = templateMap[normalizedName];
+        this.logger.log(`Found mapping: ${mappedFile}`);
+
+        if (mappedFile) {
+            return `/invitations/${mappedFile}`;
+        }
+
+        // If no mapping found, try to find a file that matches the template name
+        // This handles cases where templateName might be a filename
         const safe = templateName.trim().toLowerCase().replace(/\s+/g, '_');
-        return `/invitations/${safe}.png`;
+
+        // Try .jpg first, then .png
+        return `/invitations/${safe}.jpg`;
     }
 
     async generateInvitationHtml(id: string): Promise<string> {
@@ -87,7 +120,9 @@ export class InvitationsService {
             throw new Error('Invitation not found');
         }
 
+        this.logger.log(`Generating HTML for invitation: ${invitation.templateName}, imageUrl: ${invitation.imageUrl}`);
         const imageUrl = this.getTemplateImageUrl(invitation.templateName, invitation.imageUrl);
+        this.logger.log(`Generated imageUrl: ${imageUrl}`);
 
         return `
 <!DOCTYPE html>
