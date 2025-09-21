@@ -382,12 +382,13 @@ export class InvitationsService {
             left: 0;
             width: 100%;
             height: auto;
+            max-height: 90vh;
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
             border-radius: 25px;
             opacity: 0;
             visibility: hidden;
             transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: visible;
+            overflow-y: auto;
             z-index: 1000;
             margin-top: 40px;
             box-shadow: 
@@ -418,8 +419,8 @@ export class InvitationsService {
         .invitation-image {
             width: 100%;
             height: auto;
-            max-height: 650px;
-            object-fit: cover;
+            max-height: 80vh;
+            object-fit: contain;
             border-radius: 25px 25px 0 0;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border-bottom: 3px solid #f1f3f4;
@@ -636,7 +637,7 @@ export class InvitationsService {
             }
             
             .invitation-image {
-                max-height: 550px;
+                max-height: 70vh;
                 border-radius: 20px 20px 0 0;
             }
             
@@ -712,7 +713,7 @@ export class InvitationsService {
             }
             
             .invitation-image {
-                max-height: 450px;
+                max-height: 60vh;
                 border-radius: 18px 18px 0 0;
             }
             
