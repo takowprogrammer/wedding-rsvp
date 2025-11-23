@@ -256,26 +256,37 @@ export class GuestsService {
 
     async remove(id: string) {
         // Manually delete related records first to handle foreign key constraints
-        // since cascade delete might not be fully configured in the DB for all relations
 
-        // 1. Delete ScanLogs
+        // 1. Find the guest's QR code to clean up its logs
+        const qrCode = await this.prisma.qrCode.findUnique({
+            where: { guestId: id },
+            select: { id: true }
+        });
+
+        // 2. Delete ScanLogs linked to the Guest OR the QR Code
+        // We delete by guestId first
         await this.prisma.scanLog.deleteMany({
             where: { guestId: id }
         });
 
-        // 2. Delete EmailLogs
+        // If QR code exists, delete logs linked to it (that might not have guestId or were missed)
+        if (qrCode) {
+            await this.prisma.scanLog.deleteMany({
+                where: { qrCodeId: qrCode.id }
+            });
+        }
+
+        // 3. Delete EmailLogs
         await this.prisma.emailLog.deleteMany({
             where: { guestId: id }
         });
 
-        // 3. Delete QrCode (if exists)
-        // Note: QrCode has onDelete: Cascade in schema, but good to be explicit or safe
-        // If we rely on schema cascade for QrCode, we can skip this, but let's be safe
-        // Actually, QrCode is 1:1, so we can let Prisma handle it if configured, 
-        // but scanLogs and emailLogs are 1:N and might not have cascade.
-
-        // 4. Delete InvitationDeliveries if any (though they link to Invitation, not Guest directly usually, 
-        // but check if Guest has other relations)
+        // 4. Delete QrCode explicitly (optional, as cascade should handle it, but safe)
+        if (qrCode) {
+            await this.prisma.qrCode.delete({
+                where: { id: qrCode.id }
+            });
+        }
 
         // Finally delete the guest
         return await this.prisma.guest.delete({
