@@ -3,39 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as QRCode from 'qrcode'; // Correct the import statement
 import { v4 as uuidv4 } from 'uuid';
 
-@Injectable()
-export class QrCodesService {
-    private readonly logger = new Logger(QrCodesService.name);
-
-    constructor(private prisma: PrismaService) { }
-
-    async generateQrCode(guestId: string) {
-        this.logger.log(`Generating QR code for guest: ${guestId}`);
-
-        const alphanumericCode = Math.random().toString(36).substring(2, 10).toUpperCase();
-        this.logger.log(`Generated alphanumeric code: ${alphanumericCode}`);
-
-        const qrCodeData = alphanumericCode; 
-        this.logger.debug(`QR code data: ${qrCodeData}`);
-
-        const qrCode = await this.prisma.qrCode.create({
-            data: {
-                id: uuidv4(),
-                guestId,
-                alphanumericCode,
-                qrCodeData,
-                used: false,
-            },
-        });
-
-        this.logger.log(`QR code saved to database with ID: ${qrCode.id}`);
-        return qrCode;
-    }
-
-    async generateQrCodeImage(qrCodeData: string): Promise<string> {
-        if (!qrCodeData) {
-            this.logger.error('generateQrCodeImage called with no data');
-            throw new Error('QR code data cannot be empty.');
         }
         try {
             const image = await QRCode.toDataURL(qrCodeData);
